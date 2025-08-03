@@ -1,0 +1,40 @@
+{
+  "React Functional Component": {
+    "prefix": "rfc",
+    "body": [
+      "interface ${1:ComponentName}Props {",
+      "  $2",
+      "}",
+      "",
+      "export default function ${1:ComponentName}({ $3 }: ${1:ComponentName}Props) {",
+      "  return (",
+      "    <div>",
+      "      $0",
+      "    </div>",
+      "  )",
+      "}"
+    ],
+    "description": "Create a React functional component with TypeScript"
+  },
+  "Next.js Page Component": {
+    "prefix": "npage",
+    "body": [
+      "import { Metadata } from 'next'",
+      "",
+      "export const metadata: Metadata = {",
+      "  title: '${1:Page Title}',",
+      "  description: '${2:Page Description}',",
+      "}",
+      "",
+      "export default function ${3:PageName}() {",
+      "  return (",
+      "    <div>",
+      "      <h1>${1:Page Title}</h1>",
+      "      $0",
+      "    </div>",
+      "  )",
+      "}"
+    ],
+    "description": "Create a Next.js page component"
+  }
+}
