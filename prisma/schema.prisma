@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  bio       String?  // 个人签名
+  location  String?  // 所在地
+  website   String?  // 个人网站
+  phone     String?  // 电话号码
+  birthday  DateTime? // 生日
+  gender    String?  // 性别
+  occupation String? // 职业
+  interests String?  // 兴趣爱好（JSON格式存储）
+  socialLinks Json?  // 社交媒体链接（JSON格式存储）
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  preferences Json?
+  itineraries    Itinerary[]
+  collaborations Collaboration[]
+  userActions    UserAction[]
+  accounts       Account[]
+  sessions       Session[]
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Itinerary {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  destination String
+  budget      Float?
+  days        Int
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  data Json
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collaborations Collaboration[]
+  locations      Location[]
+  activities     Activity[]
+  @@map("itineraries")
+}
+
+model Collaboration {
+  id           String   @id @default(cuid())
+  itineraryId  String
+  userId       String
+  role         String   @default("editor")
+  joinedAt     DateTime @default(now())
+  itinerary Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([itineraryId, userId])
+  @@map("collaborations")
+}
+
+model Location {
+  id          String  @id @default(cuid())
+  name        String
+  address     String?
+  latitude    Float
+  longitude   Float
+  type        String
+  description String?
+  rating      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  metadata Json?
+  itineraries Itinerary[]
+  activities  Activity[]
+  @@map("locations")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  itineraryId String
+  locationId  String?
+  name        String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  cost        Float?
+  category    String
+  day         Int
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  metadata Json?
+  itinerary Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  location  Location? @relation(fields: [locationId], references: [id])
+  @@map("activities")
+}
+
+model UserAction {
+  id         String   @id @default(cuid())
+  userId     String
+  actionType String
+  targetType String
+  targetId   String
+  createdAt  DateTime @default(now())
+  metadata Json?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("user_actions")
+}
+
+model Recommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  description String?
+  score       Float
+  reason      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  data Json
+  @@map("recommendations")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("system_configs")
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  level     String
+  message   String
+  stack     String?
+  userId    String?
+  createdAt DateTime @default(now())
+  context Json?
+  @@map("error_logs")
+}
+
+model FileUpload {
+  id        String   @id @default(cuid())
+  userId    String?
+  filename  String
+  mimetype  String
+  size      Int
+  url       String
+  createdAt DateTime @default(now())
+  @@map("file_uploads")
+}
