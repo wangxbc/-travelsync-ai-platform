@@ -1,6 +1,7 @@
 // 基于数据库的用户认证系统
 import prisma from "./prisma";
 import bcrypt from "bcryptjs";
+import { fallbackDatabase } from "./database-fallback";
 
 // 用户数据管理类
 export class DatabaseUserManager {
@@ -85,8 +86,9 @@ export class DatabaseUserManager {
 
       return null;
     } catch (error) {
-      console.error("❌ 验证用户凭据失败:", error);
-      return null;
+      console.error("❌ 数据库验证失败，使用回退方案:", error);
+      // 使用回退数据库
+      return await fallbackDatabase.validateCredentials(email, password);
     }
   }
 
@@ -135,8 +137,9 @@ export class DatabaseUserManager {
       });
       return user;
     } catch (error) {
-      console.error("❌ 查找用户失败:", error);
-      return null;
+      console.error("❌ 数据库查找失败，使用回退方案:", error);
+      // 使用回退数据库
+      return await fallbackDatabase.findByEmail(email);
     }
   }
 
