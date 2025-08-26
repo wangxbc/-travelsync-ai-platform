@@ -10,9 +10,10 @@ import { databaseUserManager } from "./database-auth";
 class UserManager {
   private static instance: UserManager;
   private users: any[] = [];
+  private initialized: boolean = false;
 
   private constructor() {
-    this.loadUsers();
+    // 不在构造函数中调用loadUsers，延迟到需要时再初始化
   }
 
   static getInstance(): UserManager {
@@ -20,6 +21,14 @@ class UserManager {
       UserManager.instance = new UserManager();
     }
     return UserManager.instance;
+  }
+
+  // 延迟初始化方法
+  private ensureInitialized() {
+    if (!this.initialized && typeof window !== "undefined") {
+      this.loadUsers();
+      this.initialized = true;
+    }
   }
 
   // 从localStorage加载用户数据
@@ -99,16 +108,19 @@ class UserManager {
 
   // 获取所有用户
   getUsers(): any[] {
+    this.ensureInitialized();
     return this.users;
   }
 
   // 根据邮箱查找用户
   findByEmail(email: string): any | null {
+    this.ensureInitialized();
     return this.users.find((user) => user.email === email) || null;
   }
 
   // 添加用户
   addUser(user: any): void {
+    this.ensureInitialized();
     // 检查用户是否已存在
     const existingUser = this.findByEmail(user.email);
     if (existingUser) {
@@ -123,6 +135,7 @@ class UserManager {
 
   // 验证用户凭据
   validateCredentials(email: string, password: string): any | null {
+    this.ensureInitialized();
     const user = this.findByEmail(email);
     if (user && user.password === password) {
       return user;
@@ -132,11 +145,13 @@ class UserManager {
 
   // 获取用户数量（用于调试）
   getUserCount(): number {
+    this.ensureInitialized();
     return this.users.length;
   }
 
   // 清空所有用户（用于测试）
   clearUsers(): void {
+    this.ensureInitialized();
     this.users = [];
     this.saveUsers();
     console.log("已清空所有用户数据");
