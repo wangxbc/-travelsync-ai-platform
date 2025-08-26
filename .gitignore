@@ -39,3 +39,41 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# logs
+logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# temporary files
+.tmp/
+temp/
+
+# debug and test files
+debug-*.js
+test-*.js
+test-*.html
+check-*.js
+clear-*.js
+fix-*.js
+quick-fix.js
+verify-*.js
+
+# documentation files (optional - remove if you want to include them)
+*_FIX.md
+*_README.md
+*_SUMMARY.md
+*_SETUP.md
+*_ENHANCEMENT.md
