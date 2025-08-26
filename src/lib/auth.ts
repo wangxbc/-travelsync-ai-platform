@@ -4,7 +4,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { databaseUserManager } from "./database-auth";
+import { simpleAuthManager } from "./simple-auth";
 
 // 用户数据管理
 class UserManager {
@@ -350,8 +350,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // 使用数据库用户管理器验证凭据
-          const user = await databaseUserManager.validateCredentials(
+          // 使用简单认证管理器验证凭据
+          const user = await simpleAuthManager.validateCredentials(
             credentials.email,
             credentials.password
           );
@@ -368,7 +368,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
-            image: null,
+            image: user.avatar || null,
           };
         } catch (error) {
           console.error("登录验证失败:", error);
@@ -418,10 +418,10 @@ export const authOptions: NextAuthOptions = {
         token.picture = user.image;
       }
       
-      // 如果是更新触发或者定期刷新，从数据库获取最新信息
+      // 如果是更新触发或者定期刷新，从认证系统获取最新信息
       if (trigger === "update" || (!user && token.email)) {
         try {
-          const latestUser = await databaseUserManager.findByEmail(token.email as string);
+          const latestUser = await simpleAuthManager.findByEmail(token.email as string);
           if (latestUser) {
             token.name = latestUser.name;
             token.picture = latestUser.avatar;
@@ -442,9 +442,9 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         
-        // 从数据库获取最新的用户信息，包括头像
+        // 从认证系统获取最新的用户信息，包括头像
         try {
-          const latestUser = await databaseUserManager.findByEmail(token.email as string);
+          const latestUser = await simpleAuthManager.findByEmail(token.email as string);
           if (latestUser) {
             session.user.name = latestUser.name || token.name as string;
             session.user.image = latestUser.avatar || token.picture as string;
@@ -460,7 +460,7 @@ export const authOptions: NextAuthOptions = {
             (session.user as any).preferences = latestUser.preferences;
             (session.user as any).birthday = latestUser.birthday;
           } else {
-            // 如果数据库中没有找到用户，使用token中的信息
+            // 如果认证系统中没有找到用户，使用token中的信息
             session.user.image = token.picture as string;
           }
         } catch (error) {

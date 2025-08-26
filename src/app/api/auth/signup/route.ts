@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { databaseUserManager } from "@/lib/database-auth";
+import { simpleAuthManager } from "@/lib/simple-auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,13 +28,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户是否已存在
-    const existingUser = await databaseUserManager.findByEmail(email);
+    const existingUser = await simpleAuthManager.findByEmail(email);
     if (existingUser) {
       return NextResponse.json({ error: "该邮箱已被注册" }, { status: 400 });
     }
 
     // 创建新用户
-    const newUser = await databaseUserManager.createUser({
+    const newUser = await simpleAuthManager.createUser({
       name,
       email,
       password,

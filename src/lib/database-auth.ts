@@ -51,8 +51,18 @@ export class DatabaseUserManager {
       console.log("✅ 用户创建成功:", user.email);
       return user;
     } catch (error) {
-      console.error("❌ 创建用户失败:", error);
-      throw error;
+      console.error("❌ 数据库创建用户失败，使用回退方案:", error);
+      // 使用回退数据库
+      const existingUser = await fallbackDatabase.findByEmail(userData.email);
+      if (existingUser) {
+        throw new Error("用户已存在");
+      }
+      
+      return await fallbackDatabase.create({
+        email: userData.email,
+        name: userData.name,
+        password: userData.password, // 回退数据库直接存储明文密码
+      });
     }
   }
 
@@ -106,8 +116,9 @@ export class DatabaseUserManager {
       });
       return users;
     } catch (error) {
-      console.error("❌ 获取用户列表失败:", error);
-      return [];
+      console.error("❌ 数据库获取用户列表失败，使用回退方案:", error);
+      // 使用回退数据库
+      return await fallbackDatabase.getAllUsers();
     }
   }
 
