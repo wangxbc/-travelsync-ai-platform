@@ -27,7 +27,13 @@ export const metadata: Metadata = {
     "使用最先进的AI技术，为您量身定制完美的旅行计划。3D地图可视化、实时协作、智能推荐，让旅行规划变得简单而有趣。",
   keywords: "旅行规划, AI, 人工智能, 3D地图, 实时协作, 智能推荐",
   authors: [{ name: "TravelSync Team" }],
-  viewport: "width=device-width, initial-scale=1",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+};
+
+// Viewport 配置（Next.js 15 要求单独导出）
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 // 根布局组件

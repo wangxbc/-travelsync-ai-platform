@@ -22,6 +22,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // 导出Prisma客户端实例
 export default prisma
+export { prisma }
 
 // 导出一些常用的类型，方便在其他文件中使用
 export type {
