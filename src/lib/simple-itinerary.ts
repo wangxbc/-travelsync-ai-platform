@@ -64,8 +64,9 @@ class SimpleItineraryManager {
 
   private generateId(): string {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
-  }  pri
-vate initializeDefaultData() {
+  }
+
+  private initializeDefaultData() {
     // 创建一些默认地点
     const defaultLocations: Omit<SimpleLocation, 'id' | 'createdAt' | 'updatedAt'>[] = [
       {
