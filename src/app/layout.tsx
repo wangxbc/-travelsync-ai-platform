@@ -20,6 +20,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// 获取基础URL，确保格式正确
+const getBaseUrl = () => {
+  const url = process.env.NEXTAUTH_URL || 'https://travelsync-ai-platform.vercel.app';
+  // 确保URL格式正确，避免重复协议
+  if (url.startsWith('https:// ') || url.startsWith('http:// ')) {
+    return url.replace(/^https?:\/\/ /, 'https://');
+  }
+  return url.startsWith('http') ? url : `https://${url}`;
+};
+
 // 页面元数据配置
 export const metadata: Metadata = {
   title: "TravelSync - AI驱动的智能旅行规划平台",
@@ -27,7 +37,7 @@ export const metadata: Metadata = {
     "使用最先进的AI技术，为您量身定制完美的旅行计划。3D地图可视化、实时协作、智能推荐，让旅行规划变得简单而有趣。",
   keywords: "旅行规划, AI, 人工智能, 3D地图, 实时协作, 智能推荐",
   authors: [{ name: "TravelSync Team" }],
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  metadataBase: new URL(getBaseUrl()),
 };
 
 // Viewport 配置（Next.js 15 要求单独导出）
