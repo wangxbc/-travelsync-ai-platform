@@ -24,6 +24,13 @@ class UserManager {
 
   // 从localStorage加载用户数据
   private loadUsers() {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，跳过localStorage操作");
+      this.users = [];
+      return;
+    }
+
     try {
       const storedUsers = localStorage.getItem("travelsync_users");
       if (storedUsers) {
@@ -46,6 +53,12 @@ class UserManager {
 
   // 保存用户数据到localStorage
   private saveUsers() {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，跳过localStorage保存操作");
+      return;
+    }
+
     try {
       localStorage.setItem("travelsync_users", JSON.stringify(this.users));
       console.log("用户数据已保存到localStorage");
@@ -56,6 +69,12 @@ class UserManager {
 
   // 创建默认用户
   createDefaultUsers() {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，跳过创建默认用户");
+      return;
+    }
+
     const defaultUsers = [
       {
         id: Date.now().toString(),
@@ -125,6 +144,12 @@ class UserManager {
 
   // 恢复用户数据（从其他可能的存储位置）
   recoverUsers(): any[] {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，跳过用户数据恢复");
+      return [];
+    }
+
     console.log("尝试恢复用户数据...");
 
     // 检查可能的存储位置
@@ -176,6 +201,12 @@ class UserManager {
 
   // 从行程数据中恢复用户信息
   private recoverUsersFromItineraries(): void {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，跳过从行程数据恢复用户");
+      return;
+    }
+
     try {
       // 查找所有以 travel_itineraries_ 开头的键
       const keys = Object.keys(localStorage);
@@ -221,6 +252,12 @@ class UserManager {
 
   // 调试方法：显示所有localStorage数据
   debugLocalStorage(): void {
+    // 检查是否在浏览器环境中
+    if (typeof window === "undefined") {
+      console.log("服务器端环境，无法访问localStorage");
+      return;
+    }
+
     console.log("=== localStorage 调试信息 ===");
     console.log("当前用户数据:", this.users);
 
