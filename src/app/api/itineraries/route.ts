@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { itineraryOperations } from "@/lib/api/database";
+import { itineraryOperations } from "@/lib/api/simple-database";
 
 // POST - 创建新行程
 export async function POST(request: NextRequest) {

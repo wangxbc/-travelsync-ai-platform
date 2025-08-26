@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { userOperations } from '@/lib/api/database'
+import { userOperations } from '@/lib/api/simple-database'
 
 export async function PUT(request: NextRequest) {
   try {
