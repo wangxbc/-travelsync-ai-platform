@@ -5,20 +5,21 @@ const { execSync } = require('child_process');
 console.log('🚀 开始部署后脚本...');
 
 try {
-  // 检查是否有数据库URL
-  if (!process.env.DATABASE_URL) {
-    console.log('⚠️ 没有找到DATABASE_URL，跳过数据库操作');
-    console.log('✅ 部署脚本执行完成（跳过数据库操作）');
-    return;
-  }
-
   // 生成Prisma客户端
   console.log('🔧 生成Prisma客户端...');
   execSync('npx prisma generate', { stdio: 'inherit' });
   
-  // 运行数据库迁移（仅在有数据库连接时）
-  console.log('📊 运行数据库迁移...');
-  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  // 推送数据库结构（适用于SQLite）
+  console.log('📊 推送数据库结构...');
+  execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+  
+  // 创建默认用户
+  console.log('👥 创建默认用户...');
+  try {
+    execSync('node scripts/create-default-users.js', { stdio: 'inherit' });
+  } catch (userError) {
+    console.log('⚠️ 创建默认用户失败，但继续部署');
+  }
   
   console.log('✅ 部署后脚本执行完成！');
 } catch (error) {

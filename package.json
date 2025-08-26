@@ -22,7 +22,7 @@
     "db:reset": "prisma db push --force-reset && npm run db:init",
     "postinstall": "prisma generate",
     "postbuild": "echo 'Build completed successfully'",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run build && node scripts/deploy.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
