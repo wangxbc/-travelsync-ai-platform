@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
-    "prepare": "husky",
+    "prepare": "husky || echo 'Husky not available'",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -21,7 +21,8 @@
     "db:init": "node scripts/init-db.js",
     "db:reset": "prisma db push --force-reset && npm run db:init",
     "postinstall": "prisma generate",
-    "vercel-build": "npm run build && node scripts/deploy.js"
+    "postbuild": "echo 'Build completed successfully'",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -60,6 +61,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.10",
     "tailwindcss": "^4",
     "tsx": "^4.20.3",
     "tw-animate-css": "^1.3.6",

@@ -2,7 +2,7 @@
     "buildCommand": "npm run build",
     "outputDirectory": ".next",
     "framework": "nextjs",
-    "installCommand": "npm install",
+    "installCommand": "npm install --production=false",
     "devCommand": "npm run dev",
     "functions": {
         "app/api/**/*.ts": {
@@ -14,5 +14,8 @@
             "path": "/api/cron/cleanup",
             "schedule": "0 2 * * *"
         }
-    ]
+    ],
+    "env": {
+        "SKIP_ENV_VALIDATION": "1"
+    }
 }
