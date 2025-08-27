@@ -4,14 +4,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { itineraryOperations, userActionOperations } from '@/lib/api/database'
+import {
+  itineraryOperations,
+  userActionOperations,
+} from '@/lib/api/simple-database'
 
 // GET请求处理函数
 export async function GET(request: NextRequest) {
   try {
     // 获取用户会话
     const session = await getServerSession(authOptions)
-    
+
     // 检查用户是否已登录
     if (!session || !session.user) {
       return NextResponse.json(
@@ -27,7 +30,13 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate') // 开始日期
     const endDate = searchParams.get('endDate') // 结束日期
 
-    console.log('数据导出请求:', { format, type, startDate, endDate, userId: session.user.id })
+    console.log('数据导出请求:', {
+      format,
+      type,
+      startDate,
+      endDate,
+      userId: session.user.id,
+    })
 
     let data: any[] = []
     let filename = ''
@@ -37,8 +46,10 @@ export async function GET(request: NextRequest) {
       case 'itineraries':
         // 获取用户的行程数据
         data = await itineraryOperations.findByUserId(session.user.id)
-        filename = `itineraries_${session.user.id}_${new Date().toISOString().split('T')[0]}`
-        
+        filename = `itineraries_${session.user.id}_${
+          new Date().toISOString().split('T')[0]
+        }`
+
         // 过滤日期范围
         if (startDate || endDate) {
           data = data.filter(item => {
@@ -53,8 +64,10 @@ export async function GET(request: NextRequest) {
       case 'actions':
         // 获取用户行为数据
         data = await userActionOperations.findByUserId(session.user.id, 1000)
-        filename = `user_actions_${session.user.id}_${new Date().toISOString().split('T')[0]}`
-        
+        filename = `user_actions_${session.user.id}_${
+          new Date().toISOString().split('T')[0]
+        }`
+
         // 过滤日期范围
         if (startDate || endDate) {
           data = data.filter(item => {
@@ -77,35 +90,37 @@ export async function GET(request: NextRequest) {
     if (format === 'csv') {
       // 生成CSV格式
       const csvContent = generateCSV(data, type)
-      
+
       return new NextResponse(csvContent, {
         status: 200,
         headers: {
           'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': `attachment; filename="${filename}.csv"`,
-          'Cache-Control': 'no-cache'
-        }
+          'Cache-Control': 'no-cache',
+        },
       })
     } else {
       // 返回JSON格式
-      return NextResponse.json({
-        success: true,
-        data: {
-          type,
-          count: data.length,
-          exportDate: new Date().toISOString(),
-          items: data
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            type,
+            count: data.length,
+            exportDate: new Date().toISOString(),
+            items: data,
+          },
+        },
+        {
+          headers: {
+            'Content-Disposition': `attachment; filename="${filename}.json"`,
+          },
         }
-      }, {
-        headers: {
-          'Content-Disposition': `attachment; filename="${filename}.json"`
-        }
-      })
+      )
     }
-
   } catch (error) {
     console.error('数据导出API错误:', error)
-    
+
     return NextResponse.json(
       { success: false, error: '导出失败' },
       { status: 500 }
@@ -124,28 +139,41 @@ function generateCSV(data: any[], type: string): string {
 
   switch (type) {
     case 'itineraries':
-      headers = ['ID', 'Title', 'Destination', 'Budget', 'Days', 'Public', 'Created At', 'Updated At']
-      rows = data.map(item => [
-        item.id,
-        `"${item.title}"`,
-        `"${item.destination}"`,
-        item.budget || 0,
-        item.days || 0,
-        item.isPublic ? 'Yes' : 'No',
-        item.createdAt,
-        item.updatedAt
-      ].join(','))
+      headers = [
+        'ID',
+        'Title',
+        'Destination',
+        'Budget',
+        'Days',
+        'Public',
+        'Created At',
+        'Updated At',
+      ]
+      rows = data.map(item =>
+        [
+          item.id,
+          `"${item.title}"`,
+          `"${item.destination}"`,
+          item.budget || 0,
+          item.days || 0,
+          item.isPublic ? 'Yes' : 'No',
+          item.createdAt,
+          item.updatedAt,
+        ].join(',')
+      )
       break
 
     case 'actions':
       headers = ['ID', 'Action Type', 'Target Type', 'Target ID', 'Created At']
-      rows = data.map(item => [
-        item.id,
-        `"${item.actionType}"`,
-        `"${item.targetType}"`,
-        `"${item.targetId}"`,
-        item.createdAt
-      ].join(','))
+      rows = data.map(item =>
+        [
+          item.id,
+          `"${item.actionType}"`,
+          `"${item.targetType}"`,
+          `"${item.targetId}"`,
+          item.createdAt,
+        ].join(',')
+      )
       break
 
     default:
@@ -161,7 +189,7 @@ export async function POST(request: NextRequest) {
   try {
     // 获取用户会话
     const session = await getServerSession(authOptions)
-    
+
     // 检查用户是否已登录
     if (!session || !session.user) {
       return NextResponse.json(
@@ -182,14 +210,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('批量数据导出请求:', { types, format, startDate, endDate, userId: session.user.id })
+    console.log('批量数据导出请求:', {
+      types,
+      format,
+      startDate,
+      endDate,
+      userId: session.user.id,
+    })
 
     const exportData: any = {}
     const exportSummary: any = {
       exportDate: new Date().toISOString(),
       userId: session.user.id,
       types: [],
-      totalItems: 0
+      totalItems: 0,
     }
 
     // 批量获取数据
@@ -222,7 +256,7 @@ export async function POST(request: NextRequest) {
       exportData[type] = data
       exportSummary.types.push({
         type,
-        count: data.length
+        count: data.length,
       })
       exportSummary.totalItems += data.length
     }
@@ -242,34 +276,40 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const filename = `travelsync_export_${session.user.id}_${new Date().toISOString().split('T')[0]}.csv`
+      const filename = `travelsync_export_${session.user.id}_${
+        new Date().toISOString().split('T')[0]
+      }.csv`
 
       return new NextResponse(csvContent, {
         status: 200,
         headers: {
           'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': `attachment; filename="${filename}"`,
-          'Cache-Control': 'no-cache'
-        }
+          'Cache-Control': 'no-cache',
+        },
       })
     } else {
       // 返回JSON格式
-      const filename = `travelsync_export_${session.user.id}_${new Date().toISOString().split('T')[0]}.json`
+      const filename = `travelsync_export_${session.user.id}_${
+        new Date().toISOString().split('T')[0]
+      }.json`
 
-      return NextResponse.json({
-        success: true,
-        summary: exportSummary,
-        data: exportData
-      }, {
-        headers: {
-          'Content-Disposition': `attachment; filename="${filename}"`
+      return NextResponse.json(
+        {
+          success: true,
+          summary: exportSummary,
+          data: exportData,
+        },
+        {
+          headers: {
+            'Content-Disposition': `attachment; filename="${filename}"`,
+          },
         }
-      })
+      )
     }
-
   } catch (error) {
     console.error('批量数据导出API错误:', error)
-    
+
     return NextResponse.json(
       { success: false, error: '批量导出失败' },
       { status: 500 }

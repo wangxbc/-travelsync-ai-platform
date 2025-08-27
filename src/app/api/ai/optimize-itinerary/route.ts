@@ -5,14 +5,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { optimizeItinerary } from '@/lib/api/openai'
-import { itineraryOperations } from '@/lib/api/database'
+import { itineraryOperations } from '@/lib/api/simple-database'
 
 // POST请求处理函数
 export async function POST(request: NextRequest) {
   try {
     // 获取用户会话
     const session = await getServerSession(authOptions)
-    
+
     // 检查用户是否已登录
     if (!session || !session.user) {
       return NextResponse.json(
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // 获取原始行程
     const originalItinerary = await itineraryOperations.findById(itineraryId)
-    
+
     if (!originalItinerary) {
       return NextResponse.json(
         { success: false, error: '行程不存在' },
@@ -65,10 +65,11 @@ export async function POST(request: NextRequest) {
 
     // 检查用户权限（只能优化自己的行程或有编辑权限的协作行程）
     const userId = (session.user as any).id
-    const hasPermission = originalItinerary.userId === userId || 
+    const hasPermission =
+      originalItinerary.userId === userId ||
       (originalItinerary as any).collaborations?.some(
-        (collab: any) => collab.userId === userId && 
-        ['owner', 'editor'].includes(collab.role)
+        (collab: any) =>
+          collab.userId === userId && ['owner', 'editor'].includes(collab.role)
       )
 
     if (!hasPermission) {
@@ -79,8 +80,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 调用AI优化行程
-    const optimizedItinerary = await optimizeItinerary(originalItinerary as any, feedback.trim())
-    
+    const optimizedItinerary = await optimizeItinerary(
+      originalItinerary as any,
+      feedback.trim()
+    )
+
     if (!optimizedItinerary) {
       return NextResponse.json(
         { success: false, error: 'AI优化行程失败，请稍后重试' },
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
       destination: optimizedItinerary.destination,
       budget: optimizedItinerary.totalBudget,
       days: optimizedItinerary.days.length,
-      data: optimizedItinerary.data
+      data: optimizedItinerary.data,
     })
 
     if (!updatedItinerary) {
@@ -103,7 +107,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: optimizedItinerary,
-        message: '行程优化成功，但保存失败'
+        message: '行程优化成功，但保存失败',
       })
     }
 
@@ -113,12 +117,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: updatedItinerary,
-      message: '行程优化成功'
+      message: '行程优化成功',
     })
-
   } catch (error) {
     console.error('AI优化行程API错误:', error)
-    
+
     // 根据错误类型返回不同的错误信息
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -148,7 +151,7 @@ export async function GET(request: NextRequest) {
   try {
     // 获取用户会话
     const session = await getServerSession(authOptions)
-    
+
     // 检查用户是否已登录
     if (!session || !session.user) {
       return NextResponse.json(
@@ -172,7 +175,7 @@ export async function GET(request: NextRequest) {
 
     // 获取行程详情
     const itinerary = await itineraryOperations.findById(itineraryId)
-    
+
     if (!itinerary) {
       return NextResponse.json(
         { success: false, error: '行程不存在' },
@@ -182,7 +185,8 @@ export async function GET(request: NextRequest) {
 
     // 检查用户权限
     const userId = (session.user as any).id
-    const hasPermission = itinerary.userId === userId || 
+    const hasPermission =
+      itinerary.userId === userId ||
       (itinerary as any).collaborations?.some(
         (collab: any) => collab.userId === userId
       )
@@ -196,13 +200,13 @@ export async function GET(request: NextRequest) {
 
     // 提取优化历史信息
     const optimizationHistory = []
-    
+
     // 如果有生成时间，添加原始生成记录
     if (itinerary.data.generatedAt) {
       optimizationHistory.push({
         type: 'generated',
         timestamp: itinerary.data.generatedAt,
-        description: '原始行程生成'
+        description: '原始行程生成',
       })
     }
 
@@ -212,13 +216,14 @@ export async function GET(request: NextRequest) {
         type: 'optimized',
         timestamp: itinerary.data.optimizedAt,
         description: '行程优化',
-        feedback: itinerary.data.optimizationFeedback
+        feedback: itinerary.data.optimizationFeedback,
       })
     }
 
     // 按时间排序
-    optimizationHistory.sort((a, b) => 
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    optimizationHistory.sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     )
 
     // 返回响应
@@ -226,13 +231,12 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         itineraryId,
-        history: optimizationHistory
-      }
+        history: optimizationHistory,
+      },
     })
-
   } catch (error) {
     console.error('获取优化历史API错误:', error)
-    
+
     return NextResponse.json(
       { success: false, error: '获取优化历史失败' },
       { status: 500 }

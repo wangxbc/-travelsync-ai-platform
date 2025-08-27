@@ -98,17 +98,20 @@ model Collaboration {
 }
 
 model Location {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  address     String?
-  latitude    Float
-  longitude   Float
-  type        String
+  address     String
+  latitude    Float?
+  longitude   Float?
   description String?
+  imageUrl    String?
+  category    String?
   rating      Float?
+  priceRange  String?
+  openingHours Json?
+  contactInfo Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  metadata Json?
   itineraries Itinerary[]
   activities  Activity[]
   @@unique([name, address])
@@ -119,46 +122,46 @@ model Activity {
   id          String   @id @default(cuid())
   itineraryId String
   locationId  String?
-  name        String
+  title       String
   description String?
-  startTime   DateTime
-  endTime     DateTime
+  startTime   DateTime?
+  endTime     DateTime?
+  duration    Int?     // 持续时间（分钟）
   cost        Float?
-  category    String
-  day         Int
-  order       Int
+  category    String?
+  priority    Int      @default(1)
+  isCompleted Boolean  @default(false)
+  notes       String?
+  metadata    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  metadata Json?
-  itinerary Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
-  location  Location? @relation(fields: [locationId], references: [id])
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  location    Location? @relation(fields: [locationId], references: [id])
   @@map("activities")
 }
 
 model UserAction {
-  id         String   @id @default(cuid())
-  userId     String
-  actionType String
-  targetType String
-  targetId   String
-  createdAt  DateTime @default(now())
-  metadata Json?
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // 操作类型：view, like, share, comment
+  targetType  String   // 目标类型：itinerary, location, activity
+  targetId    String   // 目标ID
+  metadata    Json?    // 额外信息
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("user_actions")
 }
 
 model Recommendation {
   id          String   @id @default(cuid())
   userId      String
-  type        String
-  title       String
-  description String?
-  score       Float
-  reason      String?
-  isActive    Boolean  @default(true)
+  type        String   // 推荐类型：location, activity, itinerary
+  targetId    String   // 推荐目标ID
+  score       Float    // 推荐分数
+  reason      String?  // 推荐原因
+  isViewed    Boolean  @default(false)
+  isAccepted  Boolean  @default(false)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  data Json
   @@map("recommendations")
 }
 
