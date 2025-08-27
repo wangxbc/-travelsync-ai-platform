@@ -119,8 +119,8 @@ export const authOptions: NextAuthOptions = {
 
     // Google登录提供商
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
   ],
 
@@ -167,7 +167,7 @@ export const authOptions: NextAuthOptions = {
           console.error('Google用户创建失败:', error)
         }
       }
-
+      
       return token
     },
 

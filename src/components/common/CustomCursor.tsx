@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { isMobileDevice } from '../../lib/utils';
 
 export default function CustomCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -8,8 +9,16 @@ export default function CustomCursor() {
   const [cursorType, setCursorType] = useState<'default' | 'nav' | 'button' | 'input' | 'link' | 'card' | 'logo'>('default');
   const [hoveredElement, setHoveredElement] = useState<Element | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // 检测是否为移动设备
+    const mobile = isMobileDevice();
+    setIsMobile(mobile);
+    
+    // 如果是移动设备，不初始化自定义光标
+    if (mobile) return;
+    
     const move = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", move);
 
@@ -591,6 +600,9 @@ export default function CustomCursor() {
 
   const cursorStyles = getCursorStyles();
 
+  // 只在非移动设备上渲染自定义光标
+  if (isMobile) return null;
+  
   return (
     <motion.div
       style={{
