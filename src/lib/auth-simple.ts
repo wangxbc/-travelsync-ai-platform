@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { userOperations } from '@/lib/api/database'
+import { userOperations } from '@/lib/api/simple-database'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -8,7 +8,7 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: '邮箱', type: 'email' },
-        password: { label: '密码', type: 'password' }
+        password: { label: '密码', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
         try {
           // 查找用户
           const user = await userOperations.findByEmail(credentials.email)
-          
+
           if (!user) {
             console.log('用户不存在:', credentials.email)
             return null
@@ -26,19 +26,19 @@ export const authOptions: NextAuthOptions = {
 
           // 简化版本：直接验证通过（实际项目中应该验证密码）
           console.log('用户登录成功:', user.email)
-          
+
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            image: user.avatar // 从数据库获取头像
+            image: user.avatar, // 从数据库获取头像
           }
         } catch (error) {
           console.error('登录验证失败:', error)
           return null
         }
-      }
-    })
+      },
+    }),
   ],
 
   session: {
@@ -65,7 +65,9 @@ export const authOptions: NextAuthOptions = {
       if (trigger === 'update' && session?.user) {
         // 从数据库重新获取用户信息
         try {
-          const updatedUser = await userOperations.findByEmail(token.email as string)
+          const updatedUser = await userOperations.findByEmail(
+            token.email as string
+          )
           if (updatedUser) {
             token.name = updatedUser.name
             token.picture = updatedUser.avatar
@@ -91,7 +93,7 @@ export const authOptions: NextAuthOptions = {
 
     async signIn() {
       return true
-    }
+    },
   },
 
   events: {
@@ -100,7 +102,7 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut({ token }) {
       console.log('用户登出:', token?.email)
-    }
+    },
   },
 
   debug: process.env.NODE_ENV === 'development',

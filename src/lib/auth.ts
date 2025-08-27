@@ -1,327 +1,83 @@
 // 这个文件配置NextAuth.js认证系统
-// 作为应届生，我会使用最基础但完整的配置
+// 使用数据库认证系统，带有回退机制
 
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import { simpleAuthManager } from "./simple-auth";
+import { NextAuthOptions } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import { userOperations } from './api/database'
+import { simpleAuthManager } from './simple-auth'
 
-// 用户数据管理
-class UserManager {
-  private static instance: UserManager;
-  private users: any[] = [];
-  private initialized: boolean = false;
-
-  private constructor() {
-    // 不在构造函数中调用loadUsers，延迟到需要时再初始化
-  }
-
-  static getInstance(): UserManager {
-    if (!UserManager.instance) {
-      UserManager.instance = new UserManager();
-    }
-    return UserManager.instance;
-  }
-
-  // 延迟初始化方法
-  private ensureInitialized() {
-    if (!this.initialized && typeof window !== "undefined") {
-      this.loadUsers();
-      this.initialized = true;
-    }
-  }
-
-  // 从localStorage加载用户数据
-  private loadUsers() {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，跳过localStorage操作");
-      this.users = [];
-      return;
-    }
-
+// 数据库认证管理器
+class DatabaseAuthManager {
+  static async validateCredentials(email: string, password: string) {
     try {
-      const storedUsers = localStorage.getItem("travelsync_users");
-      if (storedUsers) {
-        this.users = JSON.parse(storedUsers);
-        console.log(
-          "已从localStorage加载用户数据:",
-          this.users.length,
-          "个用户"
-        );
-      } else {
-        // 如果没有用户数据，创建默认用户
-        this.createDefaultUsers();
-      }
-    } catch (error) {
-      console.error("加载用户数据失败:", error);
-      this.users = [];
-      this.createDefaultUsers();
-    }
-  }
+      // 尝试使用数据库认证
+      const user = await userOperations.findByEmail(email)
+      if (!user) return null
 
-  // 保存用户数据到localStorage
-  private saveUsers() {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，跳过localStorage保存操作");
-      return;
-    }
+      // 从preferences中获取密码（临时方案）
+      const preferences = user.preferences as any
+      const hashedPassword = preferences?.password
 
-    try {
-      localStorage.setItem("travelsync_users", JSON.stringify(this.users));
-      console.log("用户数据已保存到localStorage");
-    } catch (error) {
-      console.error("保存用户数据失败:", error);
-    }
-  }
+      if (!hashedPassword) return null
 
-  // 创建默认用户
-  createDefaultUsers() {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，跳过创建默认用户");
-      return;
-    }
-
-    const defaultUsers = [
-      {
-        id: Date.now().toString(),
-        name: "管理员",
-        email: "admin@example.com",
-        password: "123456",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: (Date.now() + 1).toString(),
-        name: "测试用户",
-        email: "test@example.com",
-        password: "123456",
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    this.users = defaultUsers;
-    this.saveUsers();
-    console.log("已创建默认用户");
-  }
-
-  // 获取所有用户
-  getUsers(): any[] {
-    this.ensureInitialized();
-    return this.users;
-  }
-
-  // 根据邮箱查找用户
-  findByEmail(email: string): any | null {
-    this.ensureInitialized();
-    return this.users.find((user) => user.email === email) || null;
-  }
-
-  // 添加用户
-  addUser(user: any): void {
-    this.ensureInitialized();
-    // 检查用户是否已存在
-    const existingUser = this.findByEmail(user.email);
-    if (existingUser) {
-      console.log("用户已存在:", user.email);
-      return;
-    }
-
-    this.users.push(user);
-    this.saveUsers();
-    console.log("用户已添加到认证系统:", user.email);
-  }
-
-  // 验证用户凭据
-  validateCredentials(email: string, password: string): any | null {
-    this.ensureInitialized();
-    const user = this.findByEmail(email);
-    if (user && user.password === password) {
-      return user;
-    }
-    return null;
-  }
-
-  // 获取用户数量（用于调试）
-  getUserCount(): number {
-    this.ensureInitialized();
-    return this.users.length;
-  }
-
-  // 清空所有用户（用于测试）
-  clearUsers(): void {
-    this.ensureInitialized();
-    this.users = [];
-    this.saveUsers();
-    console.log("已清空所有用户数据");
-  }
-
-  // 恢复用户数据（从其他可能的存储位置）
-  recoverUsers(): any[] {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，跳过用户数据恢复");
-      return [];
-    }
-
-    console.log("尝试恢复用户数据...");
-
-    // 检查可能的存储位置
-    const possibleKeys = [
-      "travelsync_users",
-      "users",
-      "auth_users",
-      "registered_users",
-      "travel_itineraries", // 从行程数据中恢复用户信息
-    ];
-
-    let recoveredUsers = [];
-
-    possibleKeys.forEach((key) => {
-      try {
-        const data = localStorage.getItem(key);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            console.log(`从 ${key} 找到 ${parsed.length} 个用户`);
-            recoveredUsers = recoveredUsers.concat(parsed);
-          }
+      // 验证密码（这里需要bcrypt，暂时简化）
+      if (hashedPassword === password) {
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.avatar || null,
         }
-      } catch (error) {
-        console.log(`解析 ${key} 失败:`, error);
       }
-    });
 
-    // 尝试从行程数据中恢复用户信息
-    this.recoverUsersFromItineraries();
-
-    if (recoveredUsers.length > 0) {
-      // 去重
-      const uniqueUsers = recoveredUsers.filter(
-        (user, index, self) =>
-          index === self.findIndex((u) => u.email === user.email)
-      );
-
-      this.users = uniqueUsers;
-      this.saveUsers();
-      console.log(`已恢复 ${uniqueUsers.length} 个用户`);
-      return uniqueUsers;
-    } else {
-      console.log("未找到可恢复的用户数据，创建默认用户");
-      this.createDefaultUsers();
-      return this.users;
-    }
-  }
-
-  // 从行程数据中恢复用户信息
-  private recoverUsersFromItineraries(): void {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，跳过从行程数据恢复用户");
-      return;
-    }
-
-    try {
-      // 查找所有以 travel_itineraries_ 开头的键
-      const keys = Object.keys(localStorage);
-      const itineraryKeys = keys.filter((key) =>
-        key.startsWith("travel_itineraries_")
-      );
-
-      itineraryKeys.forEach((key) => {
-        try {
-          const email = key.replace("travel_itineraries_", "");
-          const itineraries = JSON.parse(localStorage.getItem(key) || "[]");
-
-          if (itineraries.length > 0) {
-            // 从行程数据中提取用户信息
-            const firstItinerary = itineraries[0];
-            if (
-              firstItinerary.userEmail &&
-              !this.findByEmail(firstItinerary.userEmail)
-            ) {
-              const recoveredUser = {
-                id:
-                  Date.now().toString() +
-                  Math.random().toString(36).substr(2, 9),
-                name: firstItinerary.userName || email.split("@")[0],
-                email: firstItinerary.userEmail,
-                password: "123456", // 默认密码，用户需要重置
-                createdAt: firstItinerary.createdAt || new Date().toISOString(),
-                recovered: true, // 标记为恢复的用户
-              };
-
-              this.users.push(recoveredUser);
-              console.log(`从行程数据恢复用户: ${recoveredUser.email}`);
-            }
-          }
-        } catch (error) {
-          console.log(`解析行程数据失败: ${key}`, error);
-        }
-      });
+      return null
     } catch (error) {
-      console.log("从行程数据恢复用户失败:", error);
+      console.error('数据库认证失败，使用简单认证:', error)
+      // 回退到简单认证系统
+      return await simpleAuthManager.validateCredentials(email, password)
     }
   }
 
-  // 调试方法：显示所有localStorage数据
-  debugLocalStorage(): void {
-    // 检查是否在浏览器环境中
-    if (typeof window === "undefined") {
-      console.log("服务器端环境，无法访问localStorage");
-      return;
+  static async createUser(userData: {
+    email: string
+    name: string
+    password: string
+  }) {
+    try {
+      // 尝试使用数据库创建用户
+      const user = await userOperations.create({
+        email: userData.email,
+        name: userData.name,
+        preferences: {
+          password: userData.password, // 临时存储，实际应该加密
+          theme: 'light',
+          language: 'zh-CN',
+        },
+      })
+      return user
+    } catch (error) {
+      console.error('数据库创建用户失败，使用简单认证:', error)
+      // 回退到简单认证系统
+      return await simpleAuthManager.createUser(userData)
     }
-
-    console.log("=== localStorage 调试信息 ===");
-    console.log("当前用户数据:", this.users);
-
-    const keys = Object.keys(localStorage);
-    console.log("所有localStorage键:", keys);
-
-    keys.forEach((key) => {
-      try {
-        const data = localStorage.getItem(key);
-        console.log(`${key}:`, data ? JSON.parse(data) : null);
-      } catch (error) {
-        console.log(`${key}: 解析失败`);
-      }
-    });
   }
 
-  // 重置用户数据（用于测试）
-  resetUsers(): void {
-    this.users = [];
-    this.saveUsers();
-    console.log("已重置用户数据");
+  static async findByEmail(email: string) {
+    try {
+      // 尝试从数据库查找用户
+      const user = await userOperations.findByEmail(email)
+      if (user) return user
+
+      // 如果数据库中没有，尝试简单认证系统
+      return await simpleAuthManager.findByEmail(email)
+    } catch (error) {
+      console.error('数据库查找用户失败，使用简单认证:', error)
+      // 回退到简单认证系统
+      return await simpleAuthManager.findByEmail(email)
+    }
   }
 }
-
-// 获取用户管理器实例
-const userManager = UserManager.getInstance();
-
-// 动态获取用户数据的函数
-const getUsers = async () => {
-  try {
-    return userManager.getUsers();
-  } catch (error) {
-    console.error("获取用户数据失败:", error);
-    return [];
-  }
-};
-
-// 添加用户的函数（供注册API调用）
-export const addUser = (user: any) => {
-  userManager.addUser(user);
-};
-
-// 验证用户凭据的函数
-export const validateUser = (email: string, password: string) => {
-  return userManager.validateCredentials(email, password);
-};
-
-// 获取用户管理器（用于调试）
-export const getUserManager = () => userManager;
 
 // NextAuth配置选项
 export const authOptions: NextAuthOptions = {
@@ -329,50 +85,43 @@ export const authOptions: NextAuthOptions = {
   providers: [
     // 邮箱密码登录提供商
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
         email: {
-          label: "邮箱",
-          type: "email",
-          placeholder: "请输入邮箱地址",
+          label: '邮箱',
+          type: 'email',
+          placeholder: '请输入邮箱地址',
         },
         password: {
-          label: "密码",
-          type: "password",
-          placeholder: "请输入密码",
+          label: '密码',
+          type: 'password',
+          placeholder: '请输入密码',
         },
       },
       async authorize(credentials) {
         // 检查凭据是否存在
         if (!credentials?.email || !credentials?.password) {
-          console.log("缺少邮箱或密码");
-          return null;
+          console.log('缺少邮箱或密码')
+          return null
         }
 
         try {
-          // 使用简单认证管理器验证凭据
-          const user = await simpleAuthManager.validateCredentials(
+          // 使用数据库认证管理器验证凭据
+          const user = await DatabaseAuthManager.validateCredentials(
             credentials.email,
             credentials.password
-          );
+          )
 
           if (!user) {
-            console.log("用户不存在或密码错误:", credentials.email);
-            return null;
+            console.log('用户不存在或密码错误:', credentials.email)
+            return null
           }
 
-          console.log("用户登录成功:", user.email);
-
-          // 返回用户信息（不包含密码）
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.avatar || null,
-          };
+          console.log('用户登录成功:', user.email)
+          return user
         } catch (error) {
-          console.error("登录验证失败:", error);
-          return null;
+          console.error('登录验证失败:', error)
+          return null
         }
       },
     }),
@@ -382,7 +131,7 @@ export const authOptions: NextAuthOptions = {
       ? [
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
           }),
         ]
       : []),
@@ -390,7 +139,7 @@ export const authOptions: NextAuthOptions = {
 
   // 会话配置
   session: {
-    strategy: "jwt", // 使用JWT策略
+    strategy: 'jwt', // 使用JWT策略
     maxAge: 30 * 24 * 60 * 60, // 30天过期
   },
 
@@ -401,9 +150,9 @@ export const authOptions: NextAuthOptions = {
 
   // 自定义页面路径
   pages: {
-    signIn: "/auth/signin", // 自定义登录页面
-    signUp: "/auth/signup", // 自定义注册页面
-    error: "/auth/error", // 自定义错误页面
+    signIn: '/auth/signin',
+    signUp: '/auth/signup', // 自定义注册页面
+    error: '/auth/error', // 自定义错误页面
   },
 
   // 回调函数
@@ -412,95 +161,83 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       // 如果是新登录，将用户信息添加到token
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.picture = user.image;
+        token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.picture = user.image
       }
-      
+
       // 如果是更新触发或者定期刷新，从认证系统获取最新信息
-      if (trigger === "update" || (!user && token.email)) {
+      if (trigger === 'update' || (!user && token.email)) {
         try {
-          const latestUser = await simpleAuthManager.findByEmail(token.email as string);
+          const latestUser = await DatabaseAuthManager.findByEmail(
+            token.email as string
+          )
           if (latestUser) {
-            token.name = latestUser.name;
-            token.picture = latestUser.avatar;
+            token.name = latestUser.name
+            token.picture = latestUser.avatar
           }
         } catch (error) {
-          console.error("JWT回调中获取最新用户信息失败:", error);
+          console.error('JWT回调中获取最新用户信息失败:', error)
         }
       }
-      
-      return token;
+
+      return token
     },
 
     // 会话回调 - 在获取会话时调用
     async session({ session, token }) {
       // 将token中的信息添加到session
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        
-        // 从认证系统获取最新的用户信息，包括头像
-        try {
-          const latestUser = await simpleAuthManager.findByEmail(token.email as string);
-          if (latestUser) {
-            session.user.name = latestUser.name || token.name as string;
-            session.user.image = latestUser.avatar || token.picture as string;
-            // 添加其他用户信息
-            (session.user as any).bio = latestUser.bio;
-            (session.user as any).location = latestUser.location;
-            (session.user as any).website = latestUser.website;
-            (session.user as any).phone = latestUser.phone;
-            (session.user as any).gender = latestUser.gender;
-            (session.user as any).occupation = latestUser.occupation;
-            (session.user as any).interests = latestUser.interests;
-            (session.user as any).socialLinks = latestUser.socialLinks;
-            (session.user as any).preferences = latestUser.preferences;
-            (session.user as any).birthday = latestUser.birthday;
-          } else {
-            // 如果认证系统中没有找到用户，使用token中的信息
-            session.user.image = token.picture as string;
-          }
-        } catch (error) {
-          console.error("获取最新用户信息失败:", error);
-          // 出错时使用token中的信息
-          session.user.image = token.picture as string;
-        }
+      if (token && session.user) {
+        session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.picture as string
       }
-      return session;
+      return session
     },
 
-    // 登录回调 - 简化版本
-    async signIn() {
-      return true;
+    // 登录回调
+    async signIn({ user, account, profile }) {
+      // 如果是Google登录，检查用户是否已存在，不存在则创建
+      if (account?.provider === 'google' && profile?.email) {
+        try {
+          const existingUser = await DatabaseAuthManager.findByEmail(
+            profile.email
+          )
+          if (!existingUser) {
+            // 创建新用户
+            await DatabaseAuthManager.createUser({
+              email: profile.email,
+              name: profile.name || profile.email.split('@')[0],
+              password: Math.random().toString(36).substr(2, 15), // 生成随机密码
+            })
+            console.log('Google登录用户自动创建:', profile.email)
+          }
+        } catch (error) {
+          console.error('Google登录用户创建失败:', error)
+        }
+      }
+      return true
     },
   },
 
   // 事件处理
   events: {
-    // 用户登录事件
-    async signIn({ user, account, profile, isNewUser }) {
-      console.log("用户登录事件:", {
-        userId: user.id,
-        email: user.email,
-        provider: account?.provider,
-        isNewUser,
-      });
+    async signIn({ user, account, profile }) {
+      console.log('用户登录:', user.email, '提供商:', account?.provider)
     },
-
-    // 用户登出事件
-    async signOut({ session, token }) {
-      console.log("用户登出事件:", {
-        userId: session?.user?.id || token?.id,
-      });
+    async signOut({ token }) {
+      console.log('用户登出:', token?.email)
+    },
+    async createUser({ user }) {
+      console.log('新用户创建:', user.email)
     },
   },
 
-  // 调试模式（开发环境启用）
-  debug: process.env.NODE_ENV === "development",
-};
+  // 调试模式（开发环境）
+  debug: process.env.NODE_ENV === 'development',
+}
 
-// 导出默认配置
-export default authOptions;
+// 导出类型定义
+export type { NextAuthOptions }
