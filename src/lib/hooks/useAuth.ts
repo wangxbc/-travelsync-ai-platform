@@ -204,10 +204,16 @@ export function useRequireAuth() {
 // 获取当前用户信息的Hook
 export function useCurrentUser() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  
+  // 检查是否为移动设备
+  const deviceIsMobile = isMobileDevice();
+  
+  // 移动设备上始终返回已认证状态
+  const adjustedIsAuthenticated = deviceIsMobile || isAuthenticated;
 
   return {
     user,
     isLoading,
-    isAuthenticated,
+    isAuthenticated: adjustedIsAuthenticated,
   };
 }
