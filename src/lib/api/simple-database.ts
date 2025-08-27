@@ -384,12 +384,4 @@ export const userActionOperations = {
   },
 }
 
-// 导出所有操作
-export {
-  userOperations,
-  itineraryOperations,
-  locationOperations,
-  activityOperations,
-  collaborationOperations,
-  userActionOperations,
-}
+// 所有操作已经在上面导出，这里不需要重复导出
