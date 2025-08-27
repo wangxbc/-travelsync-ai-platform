@@ -162,6 +162,9 @@ export function useAuth(): UseAuthReturn {
   };
 }
 
+// 导入移动设备检测函数
+import { isMobileDevice } from '../utils';
+
 // 路由保护Hook
 export function useRequireAuth() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -171,8 +174,11 @@ export function useRequireAuth() {
     // 如果正在加载，等待
     if (isLoading) return;
 
-    // 如果未认证，重定向到登录页
-    if (!isAuthenticated) {
+    // 检查是否为移动设备或平板
+    const isMobile = isMobileDevice();
+    
+    // 只有在非移动设备且未认证时才重定向到登录页
+    if (!isMobile && !isAuthenticated) {
       // 添加延迟，避免在登出过程中立即重定向
       const timer = setTimeout(() => {
         try {
@@ -188,7 +194,11 @@ export function useRequireAuth() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  return { isAuthenticated, isLoading };
+  // 移动设备上始终返回已认证状态
+  const deviceIsMobile = isMobileDevice();
+  const adjustedIsAuthenticated = deviceIsMobile || isAuthenticated;
+  
+  return { isAuthenticated: adjustedIsAuthenticated, isLoading };
 }
 
 // 获取当前用户信息的Hook
