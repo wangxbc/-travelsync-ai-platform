@@ -20,9 +20,10 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:init": "node scripts/init-db.js",
     "db:reset": "prisma db push --force-reset && npm run db:init",
+    "test:db": "node scripts/test-database.js",
     "postinstall": "prisma generate",
     "postbuild": "echo 'Build completed successfully'",
-    "vercel-build": "npm run build && node scripts/deploy.js"
+    "vercel-build": "prisma generate && prisma db push && npm run build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
