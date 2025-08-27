@@ -1,6 +1,7 @@
 // 简单数据库操作 - 替代原有的数据库操作
 import { simpleAuthManager } from '@/lib/simple-auth'
 import { databaseItineraryManager } from './database-itinerary'
+import { simpleItineraryManager } from '@/lib/simple-itinerary'
 
 // 检查是否有有效的数据库连接
 const hasValidDatabaseUrl = () => {
@@ -164,23 +165,33 @@ export const userOperations = {
   },
 }
 
-// 行程相关的操作（使用数据库行程系统）
+// 行程相关的操作（带回退机制）
 export const itineraryOperations = {
   findByUserId: async (userId: string) => {
+    // 如果没有有效的数据库连接，直接使用简单行程系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleItineraryManager.findItinerariesByUserId(userId)
+    }
+
     try {
       return await databaseItineraryManager.findItinerariesByUserId(userId)
     } catch (error) {
-      console.error('数据库行程查询失败:', error)
-      return []
+      console.error('数据库行程查询失败，回退到简单行程系统:', error)
+      return await simpleItineraryManager.findItinerariesByUserId(userId)
     }
   },
 
   findById: async (itineraryId: string) => {
+    // 如果没有有效的数据库连接，直接使用简单行程系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleItineraryManager.findItineraryById(itineraryId)
+    }
+
     try {
       return await databaseItineraryManager.findItineraryById(itineraryId)
     } catch (error) {
-      console.error('数据库行程查询失败:', error)
-      return null
+      console.error('数据库行程查询失败，回退到简单行程系统:', error)
+      return await simpleItineraryManager.findItineraryById(itineraryId)
     }
   },
 
@@ -193,15 +204,42 @@ export const itineraryOperations = {
     data: any
     isPublic?: boolean
   }) => {
+    // 如果没有有效的数据库连接，直接使用简单行程系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleItineraryManager.createItinerary({
+        userId: itineraryData.userId,
+        title: itineraryData.title,
+        destination: itineraryData.destination,
+        budget: itineraryData.budget,
+        days: itineraryData.days,
+        data: itineraryData.data,
+        isPublic: itineraryData.isPublic
+      })
+    }
+
     try {
       return await databaseItineraryManager.createItinerary(itineraryData)
     } catch (error) {
-      console.error('数据库行程创建失败:', error)
-      return null
+      console.error('数据库行程创建失败，回退到简单行程系统:', error)
+      return await simpleItineraryManager.createItinerary({
+        userId: itineraryData.userId,
+        title: itineraryData.title,
+        destination: itineraryData.destination,
+        budget: itineraryData.budget,
+        days: itineraryData.days,
+        data: itineraryData.data,
+        isPublic: itineraryData.isPublic
+      })
     }
   },
 
   update: async (itineraryId: string, updateData: any) => {
+    // 如果没有有效的数据库连接，直接返回null（简单行程系统不支持更新）
+    if (!hasValidDatabaseUrl()) {
+      console.warn('简单行程系统不支持更新操作')
+      return null
+    }
+
     try {
       return await databaseItineraryManager.updateItinerary(
         itineraryId,
@@ -214,11 +252,16 @@ export const itineraryOperations = {
   },
 
   delete: async (itineraryId: string) => {
+    // 如果没有有效的数据库连接，使用简单行程系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleItineraryManager.deleteItinerary(itineraryId)
+    }
+
     try {
       return await databaseItineraryManager.deleteItinerary(itineraryId)
     } catch (error) {
-      console.error('数据库行程删除失败:', error)
-      return false
+      console.error('数据库行程删除失败，回退到简单行程系统:', error)
+      return await simpleItineraryManager.deleteItinerary(itineraryId)
     }
   },
 }
