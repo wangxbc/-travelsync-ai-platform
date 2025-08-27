@@ -4,7 +4,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { userOperations } from './api/database'
+import { userOperations } from './api/simple-database'
 import { simpleAuthManager } from './simple-auth'
 
 // 数据库认证管理器
@@ -99,67 +99,47 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials) {
-        // 检查凭据是否存在
         if (!credentials?.email || !credentials?.password) {
-          console.log('缺少邮箱或密码')
           return null
         }
 
         try {
-          // 使用数据库认证管理器验证凭据
+          // 使用数据库认证管理器
           const user = await DatabaseAuthManager.validateCredentials(
             credentials.email,
             credentials.password
           )
-
-          if (!user) {
-            console.log('用户不存在或密码错误:', credentials.email)
-            return null
-          }
-
-          console.log('用户登录成功:', user.email)
           return user
         } catch (error) {
-          console.error('登录验证失败:', error)
+          console.error('认证失败:', error)
           return null
         }
       },
     }),
 
-    // Google OAuth登录提供商（可选）
-    ...(process.env.GOOGLE_CLIENT_ID
-      ? [
-          GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-          }),
-        ]
-      : []),
+    // Google登录提供商
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
   ],
 
-  // 会话配置
+  // 配置会话策略
   session: {
-    strategy: 'jwt', // 使用JWT策略
-    maxAge: 30 * 24 * 60 * 60, // 30天过期
+    strategy: 'jwt',
   },
 
-  // JWT配置
-  jwt: {
-    maxAge: 30 * 24 * 60 * 60, // 30天过期
-  },
-
-  // 自定义页面路径
+  // 配置页面
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup', // 自定义注册页面
-    error: '/auth/error', // 自定义错误页面
+    signUp: '/auth/signup',
+    error: '/auth/error',
   },
 
-  // 回调函数
+  // JWT回调函数
   callbacks: {
-    // JWT回调 - 在JWT创建时调用
-    async jwt({ token, user, trigger, session }) {
-      // 如果是新登录，将用户信息添加到token
+    async jwt({ token, user, account }) {
+      // 如果是首次登录，将用户信息添加到token中
       if (user) {
         token.id = user.id
         token.email = user.email
@@ -167,77 +147,60 @@ export const authOptions: NextAuthOptions = {
         token.picture = user.image
       }
 
-      // 如果是更新触发或者定期刷新，从认证系统获取最新信息
-      if (trigger === 'update' || (!user && token.email)) {
+      // 如果是Google登录，处理用户创建
+      if (account?.provider === 'google' && user) {
         try {
-          const latestUser = await DatabaseAuthManager.findByEmail(
-            token.email as string
+          // 检查用户是否已存在
+          const existingUser = await DatabaseAuthManager.findByEmail(
+            user.email!
           )
-          if (latestUser) {
-            token.name = latestUser.name
-            token.picture = latestUser.avatar
+
+          if (!existingUser) {
+            // 创建新用户
+            await DatabaseAuthManager.createUser({
+              email: user.email!,
+              name: user.name!,
+              password: 'google-auth', // Google用户不需要密码
+            })
           }
         } catch (error) {
-          console.error('JWT回调中获取最新用户信息失败:', error)
+          console.error('Google用户创建失败:', error)
         }
       }
 
       return token
     },
 
-    // 会话回调 - 在获取会话时调用
     async session({ session, token }) {
-      // 将token中的信息添加到session
-      if (token && session.user) {
+      // 将token中的信息添加到session中
+      if (token) {
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.name = token.name as string
         session.user.image = token.picture as string
       }
+
       return session
     },
 
-    // 登录回调
     async signIn({ user, account, profile }) {
-      // 如果是Google登录，检查用户是否已存在，不存在则创建
-      if (account?.provider === 'google' && profile?.email) {
-        try {
-          const existingUser = await DatabaseAuthManager.findByEmail(
-            profile.email
-          )
-          if (!existingUser) {
-            // 创建新用户
-            await DatabaseAuthManager.createUser({
-              email: profile.email,
-              name: profile.name || profile.email.split('@')[0],
-              password: Math.random().toString(36).substr(2, 15), // 生成随机密码
-            })
-            console.log('Google登录用户自动创建:', profile.email)
-          }
-        } catch (error) {
-          console.error('Google登录用户创建失败:', error)
-        }
+      // 如果是Google登录，确保用户信息完整
+      if (account?.provider === 'google' && profile) {
+        user.email = profile.email
+        user.name = profile.name
+        user.image = profile.picture
       }
+
       return true
     },
   },
 
-  // 事件处理
-  events: {
-    async signIn({ user, account, profile }) {
-      console.log('用户登录:', user.email, '提供商:', account?.provider)
-    },
-    async signOut({ token }) {
-      console.log('用户登出:', token?.email)
-    },
-    async createUser({ user }) {
-      console.log('新用户创建:', user.email)
-    },
-  },
-
-  // 调试模式（开发环境）
+  // 配置调试模式
   debug: process.env.NODE_ENV === 'development',
+
+  // 配置密钥
+  secret: process.env.NEXTAUTH_SECRET,
 }
 
-// 导出类型定义
-export type { NextAuthOptions }
+// 导出认证选项
+export default authOptions
