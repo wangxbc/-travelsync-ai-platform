@@ -23,7 +23,7 @@
     "test:db": "node scripts/test-database.js",
     "postinstall": "prisma generate",
     "postbuild": "echo 'Build completed successfully'",
-    "vercel-build": "prisma generate && prisma db push && npm run build"
+    "vercel-build": "node scripts/vercel-build.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

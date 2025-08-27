@@ -9,11 +9,39 @@ declare global {
   var prisma: PrismaClient | undefined
 }
 
+// 检查是否有有效的数据库URL
+const hasValidDatabaseUrl = () => {
+  const databaseUrl = process.env.DATABASE_URL
+  return databaseUrl && (
+    databaseUrl.startsWith('postgresql://') || 
+    databaseUrl.startsWith('postgres://') ||
+    databaseUrl.startsWith('mysql://') ||
+    databaseUrl.startsWith('sqlite://')
+  )
+}
+
 // 创建Prisma客户端实例
 // 在开发环境中，我们使用全局变量来避免热重载时创建多个连接
-const prisma = globalThis.prisma || new PrismaClient({
-  log: ['query'], // 在开发环境中记录SQL查询，方便调试
-})
+const createPrismaClient = () => {
+  if (!hasValidDatabaseUrl()) {
+    console.warn('⚠️  DATABASE_URL not found or invalid. Using mock Prisma client.')
+    // 返回一个模拟的Prisma客户端，用于构建时
+    return new PrismaClient({
+      datasources: {
+        db: {
+          url: 'postgresql://mock:mock@localhost:5432/mock'
+        }
+      },
+      log: []
+    })
+  }
+
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+  })
+}
+
+const prisma = globalThis.prisma || createPrismaClient()
 
 // 如果是开发环境，将客户端实例保存到全局变量
 if (process.env.NODE_ENV === 'development') {
