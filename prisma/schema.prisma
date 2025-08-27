@@ -111,6 +111,7 @@ model Location {
   metadata Json?
   itineraries Itinerary[]
   activities  Activity[]
+  @@unique([name, address])
   @@map("locations")
 }
 
