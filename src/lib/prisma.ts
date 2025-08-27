@@ -12,11 +12,14 @@ declare global {
 // 检查是否有有效的数据库URL
 const hasValidDatabaseUrl = () => {
   const databaseUrl = process.env.DATABASE_URL
-  return databaseUrl && (
-    databaseUrl.startsWith('postgresql://') || 
-    databaseUrl.startsWith('postgres://') ||
-    databaseUrl.startsWith('mysql://') ||
-    databaseUrl.startsWith('sqlite://')
+  return (
+    databaseUrl &&
+    (databaseUrl.startsWith('postgresql://') ||
+      databaseUrl.startsWith('postgres://') ||
+      databaseUrl.startsWith('mysql://') ||
+      databaseUrl.startsWith('sqlite://')) &&
+    !databaseUrl.includes('localhost:5432') && // 排除本地数据库
+    !databaseUrl.includes('mock') // 排除模拟数据库
   )
 }
 
@@ -24,15 +27,17 @@ const hasValidDatabaseUrl = () => {
 // 在开发环境中，我们使用全局变量来避免热重载时创建多个连接
 const createPrismaClient = () => {
   if (!hasValidDatabaseUrl()) {
-    console.warn('⚠️  DATABASE_URL not found or invalid. Using mock Prisma client.')
+    console.warn(
+      '⚠️  DATABASE_URL not found or invalid. Using mock Prisma client.'
+    )
     // 返回一个模拟的Prisma客户端，用于构建时
     return new PrismaClient({
       datasources: {
         db: {
-          url: 'postgresql://mock:mock@localhost:5432/mock'
-        }
+          url: 'postgresql://mock:mock@localhost:5432/mock',
+        },
       },
-      log: []
+      log: [],
     })
   }
 
@@ -60,5 +65,5 @@ export type {
   Activity,
   Collaboration,
   UserAction,
-  Recommendation
+  Recommendation,
 } from '@prisma/client'

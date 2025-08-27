@@ -2,14 +2,52 @@
 import { simpleAuthManager } from '@/lib/simple-auth'
 import { databaseItineraryManager } from './database-itinerary'
 
+// 检查是否有有效的数据库连接
+const hasValidDatabaseUrl = () => {
+  const databaseUrl = process.env.DATABASE_URL
+  return (
+    databaseUrl &&
+    (databaseUrl.startsWith('postgresql://') ||
+      databaseUrl.startsWith('postgres://') ||
+      databaseUrl.startsWith('mysql://') ||
+      databaseUrl.startsWith('sqlite://')) &&
+    !databaseUrl.includes('localhost:5432') && // 排除本地数据库
+    !databaseUrl.includes('mock') // 排除模拟数据库
+  )
+}
+
 // 用户相关的操作（使用简单认证系统）
 export const userOperations = {
   findByEmail: async (email: string) => {
-    return await simpleAuthManager.findByEmail(email)
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.findByEmail(email)
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.findByEmail(email)
+    } catch (error) {
+      console.error('数据库用户查询失败，回退到简单认证:', error)
+      return await simpleAuthManager.findByEmail(email)
+    }
   },
 
   findById: async (id: string) => {
-    return await simpleAuthManager.findById(id)
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.findById(id)
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.findById(id)
+    } catch (error) {
+      console.error('数据库用户查询失败，回退到简单认证:', error)
+      return await simpleAuthManager.findById(id)
+    }
   },
 
   create: async (userData: {
@@ -18,33 +56,111 @@ export const userOperations = {
     avatar?: string
     preferences?: any
   }) => {
-    return await simpleAuthManager.createUser({
-      email: userData.email,
-      name: userData.name,
-      password: '123456', // 默认密码
-      avatar: userData.avatar,
-      preferences: userData.preferences,
-    })
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.createUser({
+        email: userData.email,
+        name: userData.name,
+        password: '123456', // 默认密码
+        avatar: userData.avatar,
+        preferences: userData.preferences,
+      })
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.create(userData)
+    } catch (error) {
+      console.error('数据库用户创建失败，回退到简单认证:', error)
+      return await simpleAuthManager.createUser({
+        email: userData.email,
+        name: userData.name,
+        password: '123456', // 默认密码
+        avatar: userData.avatar,
+        preferences: userData.preferences,
+      })
+    }
   },
 
   update: async (userId: string, updateData: any) => {
-    return await simpleAuthManager.updateUser(userId, updateData)
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.updateUser(userId, updateData)
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.update(userId, updateData)
+    } catch (error) {
+      console.error('数据库用户更新失败，回退到简单认证:', error)
+      return await simpleAuthManager.updateUser(userId, updateData)
+    }
   },
 
   delete: async (userId: string) => {
-    return true // Simple implementation
+    // 如果没有有效的数据库连接，直接返回成功
+    if (!hasValidDatabaseUrl()) {
+      return true
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.delete(userId)
+    } catch (error) {
+      console.error('数据库用户删除失败:', error)
+      return true // 简单实现
+    }
   },
 
   updateAvatar: async (userId: string, avatarUrl: string) => {
-    return await simpleAuthManager.updateUser(userId, { avatar: avatarUrl })
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.updateUser(userId, { avatar: avatarUrl })
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.updateAvatar(userId, avatarUrl)
+    } catch (error) {
+      console.error('数据库头像更新失败，回退到简单认证:', error)
+      return await simpleAuthManager.updateUser(userId, { avatar: avatarUrl })
+    }
   },
 
   getAllUsers: async () => {
-    return await simpleAuthManager.getAllUsers()
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.getAllUsers()
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.getAllUsers()
+    } catch (error) {
+      console.error('数据库用户查询失败，回退到简单认证:', error)
+      return await simpleAuthManager.getAllUsers()
+    }
   },
 
   validateCredentials: async (email: string, password: string) => {
-    return await simpleAuthManager.validateCredentials(email, password)
+    // 如果没有有效的数据库连接，直接使用简单认证系统
+    if (!hasValidDatabaseUrl()) {
+      return await simpleAuthManager.validateCredentials(email, password)
+    }
+
+    try {
+      // 尝试使用数据库操作
+      const { userOperations: dbUserOperations } = await import('./database')
+      return await dbUserOperations.validateCredentials(email, password)
+    } catch (error) {
+      console.error('数据库凭据验证失败，回退到简单认证:', error)
+      return await simpleAuthManager.validateCredentials(email, password)
+    }
   },
 }
 
@@ -268,4 +384,12 @@ export const userActionOperations = {
   },
 }
 
-// 所有操作已经在上面导出，这里不需要重复导出
+// 导出所有操作
+export {
+  userOperations,
+  itineraryOperations,
+  locationOperations,
+  activityOperations,
+  collaborationOperations,
+  userActionOperations,
+}

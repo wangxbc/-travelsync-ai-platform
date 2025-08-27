@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userOperations } from '@/lib/api/database'
+import { userOperations } from '@/lib/api/simple-database'
 import { simpleAuthManager } from '@/lib/simple-auth'
 
 export async function POST(request: NextRequest) {
@@ -47,7 +47,11 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      console.log('用户注册成功（数据库）:', newUser.email)
+      if (newUser) {
+        console.log('用户注册成功（数据库）:', newUser.email)
+      } else {
+        throw new Error('数据库用户创建返回null')
+      }
     } catch (error) {
       console.error('数据库注册失败，使用简单认证:', error)
       useDatabase = false
@@ -67,7 +71,11 @@ export async function POST(request: NextRequest) {
           password,
         })
 
-        console.log('用户注册成功（简单认证）:', newUser.email)
+        if (newUser) {
+          console.log('用户注册成功（简单认证）:', newUser.email)
+        } else {
+          throw new Error('简单认证用户创建返回null')
+        }
       } catch (simpleError) {
         console.error('简单认证注册也失败:', simpleError)
         return NextResponse.json(
@@ -75,6 +83,14 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
+    }
+
+    // 确保newUser不为null
+    if (!newUser) {
+      return NextResponse.json(
+        { error: '用户创建失败' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(
