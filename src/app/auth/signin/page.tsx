@@ -261,18 +261,7 @@ function SignInForm() {
               Google登录
             </button>
           </div>
-        </form>
-
-        {/* 测试账户提示 */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-md">
-          <p className="text-sm text-blue-700">
-            <strong>测试账户：</strong>
-            <br />
-            邮箱: test@example.com
-            <br />
-            密码: 任意密码（演示用）
-          </p>
-        </div>
+        </form>        
       </div>
     </div>
   );

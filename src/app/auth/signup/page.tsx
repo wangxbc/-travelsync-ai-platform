@@ -292,19 +292,6 @@ export default function SignUpPage() {
             </button>
           </div>
         </form>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-md">
-          <p className="text-sm text-blue-700">
-            注册后您将可以：
-            <br />
-            • 使用AI智能规划旅行行程
-            <br />
-            • 在3D地图上查看路线
-            <br />
-            • 与朋友实时协作规划
-            <br />• 获得个性化推荐
-          </p>
-        </div>
       </div>
     </div>
   );
