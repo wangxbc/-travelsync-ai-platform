@@ -1,6 +1,3 @@
-// 服务条款页面
-// 作为应届生，我会创建一个基础的服务条款页面
-
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">

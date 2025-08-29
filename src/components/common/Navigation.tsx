@@ -1,6 +1,3 @@
-// 通用导航组件
-// 作为应届生，我会创建一个可复用的导航栏组件
-
 'use client'
 
 import { useState } from 'react'

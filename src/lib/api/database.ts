@@ -1,12 +1,7 @@
-// 这个文件包含数据库操作的工具函数
-// 作为应届生，我会把常用的数据库操作封装成函数
-
 import prisma from '@/lib/prisma'
 import type { User, Itinerary, Location, Activity } from '@prisma/client'
 
-// 用户相关的数据库操作
 export const userOperations = {
-  // 根据邮箱查找用户
   findByEmail: async (email: string): Promise<User | null> => {
     try {
       const user = await prisma.user.findUnique({
@@ -19,7 +14,6 @@ export const userOperations = {
     }
   },
 
-  // 创建新用户
   create: async (userData: {
     email: string
     name: string
@@ -37,7 +31,6 @@ export const userOperations = {
     }
   },
 
-  // 更新用户信息
   update: async (
     userId: string,
     updateData: {
@@ -56,7 +49,6 @@ export const userOperations = {
     }
   ): Promise<User | null> => {
     try {
-      // 支持所有用户字段的更新
       const validFields = [
         'name',
         'avatar',
@@ -82,14 +74,11 @@ export const userOperations = {
         }
       })
 
-      console.log('🔄 更新用户数据:', { userId, filteredData })
-
       const user = await prisma.user.update({
         where: { id: userId },
         data: filteredData,
       })
 
-      console.log('✅ 用户更新成功:', user.id)
       return user
     } catch (error) {
       console.error('更新用户失败:', error)
@@ -97,7 +86,6 @@ export const userOperations = {
     }
   },
 
-  // 删除用户
   delete: async (userId: string): Promise<boolean> => {
     try {
       await prisma.user.delete({
@@ -110,20 +98,17 @@ export const userOperations = {
     }
   },
 
-  // 专门更新头像
   updateAvatar: async (
     userId: string,
     avatarUrl: string
   ): Promise<User | null> => {
     try {
-      console.log('🔄 更新头像:', { userId, avatarUrl })
 
       const user = await prisma.user.update({
         where: { id: userId },
         data: { avatar: avatarUrl },
       })
 
-      console.log('✅ 头像更新成功:', user.id)
       return user
     } catch (error) {
       console.error('更新头像失败:', error)
@@ -132,9 +117,7 @@ export const userOperations = {
   },
 }
 
-// 行程相关的数据库操作
 export const itineraryOperations = {
-  // 获取用户的所有行程
   findByUserId: async (userId: string): Promise<Itinerary[]> => {
     try {
       const itineraries = await prisma.itinerary.findMany({
@@ -161,7 +144,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 根据ID获取行程详情
   findById: async (itineraryId: string): Promise<Itinerary | null> => {
     try {
       const itinerary = await prisma.itinerary.findUnique({
@@ -189,7 +171,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 创建新行程
   create: async (itineraryData: {
     userId: string
     title: string
@@ -214,7 +195,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 更新行程
   update: async (
     itineraryId: string,
     updateData: {
@@ -238,7 +218,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 删除行程
   delete: async (itineraryId: string): Promise<boolean> => {
     try {
       await prisma.itinerary.delete({
@@ -251,7 +230,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 获取公开的行程（用于推荐）
   findPublic: async (limit: number = 10): Promise<Itinerary[]> => {
     try {
       const itineraries = await prisma.itinerary.findMany({
@@ -280,7 +258,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 添加协作者
   addCollaborator: async (
     itineraryId: string,
     userId: string,
@@ -301,7 +278,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 移除协作者
   removeCollaborator: async (
     itineraryId: string,
     userId: string
@@ -322,7 +298,6 @@ export const itineraryOperations = {
     }
   },
 
-  // 获取用户的协作行程
   findCollaborationsByUserId: async (userId: string): Promise<any[]> => {
     try {
       const collaborations = await prisma.collaboration.findMany({
@@ -344,9 +319,7 @@ export const itineraryOperations = {
   },
 }
 
-// 地点相关的数据库操作
 export const locationOperations = {
-  // 根据ID查找地点
   findById: async (locationId: string): Promise<Location | null> => {
     try {
       const location = await prisma.location.findUnique({
@@ -359,7 +332,6 @@ export const locationOperations = {
     }
   },
 
-  // 根据名称搜索地点
   searchByName: async (
     name: string,
     limit: number = 10
@@ -381,15 +353,13 @@ export const locationOperations = {
     }
   },
 
-  // 根据坐标范围查找附近地点
   findNearby: async (
     latitude: number,
     longitude: number,
-    radius: number = 0.01, // 大约1公里
+    radius: number = 0.01,
     limit: number = 20
   ): Promise<Location[]> => {
     try {
-      // 简单的矩形范围查询（实际项目中可能需要更精确的地理查询）
       const locations = await prisma.location.findMany({
         where: {
           latitude: {
@@ -411,7 +381,6 @@ export const locationOperations = {
     }
   },
 
-  // 创建新地点
   create: async (locationData: {
     name: string
     address?: string
@@ -433,7 +402,6 @@ export const locationOperations = {
     }
   },
 
-  // 更新地点
   update: async (
     locationId: string,
     updateData: {
@@ -459,7 +427,6 @@ export const locationOperations = {
     }
   },
 
-  // 删除地点
   delete: async (locationId: string): Promise<boolean> => {
     try {
       await prisma.location.delete({
@@ -472,7 +439,6 @@ export const locationOperations = {
     }
   },
 
-  // 根据类型获取地点
   findByType: async (type: string, limit: number = 20): Promise<Location[]> => {
     try {
       const locations = await prisma.location.findMany({
@@ -488,9 +454,7 @@ export const locationOperations = {
   },
 }
 
-// 活动相关的数据库操作
 export const activityOperations = {
-  // 获取行程的所有活动
   findByItineraryId: async (itineraryId: string): Promise<Activity[]> => {
     try {
       const activities = await prisma.activity.findMany({
@@ -507,7 +471,6 @@ export const activityOperations = {
     }
   },
 
-  // 创建新活动
   create: async (activityData: {
     itineraryId: string
     locationId?: string
@@ -535,7 +498,6 @@ export const activityOperations = {
     }
   },
 
-  // 更新活动
   update: async (
     activityId: string,
     updateData: {
@@ -565,7 +527,6 @@ export const activityOperations = {
     }
   },
 
-  // 删除活动
   delete: async (activityId: string): Promise<boolean> => {
     try {
       await prisma.activity.delete({
@@ -579,9 +540,7 @@ export const activityOperations = {
   },
 }
 
-// 协作相关的数据库操作
 export const collaborationOperations = {
-  // 添加协作者
   addCollaborator: async (
     itineraryId: string,
     userId: string,
@@ -602,7 +561,6 @@ export const collaborationOperations = {
     }
   },
 
-  // 移除协作者
   removeCollaborator: async (
     itineraryId: string,
     userId: string
@@ -623,7 +581,6 @@ export const collaborationOperations = {
     }
   },
 
-  // 获取用户参与的协作行程
   findByUserId: async (userId: string): Promise<any[]> => {
     try {
       const collaborations = await prisma.collaboration.findMany({
@@ -645,9 +602,7 @@ export const collaborationOperations = {
   },
 }
 
-// 用户行为记录操作
 export const userActionOperations = {
-  // 记录用户行为
   create: async (actionData: {
     userId: string
     actionType: string
@@ -666,7 +621,6 @@ export const userActionOperations = {
     }
   },
 
-  // 获取用户行为历史
   findByUserId: async (userId: string, limit: number = 50): Promise<any[]> => {
     try {
       const actions = await prisma.userAction.findMany({

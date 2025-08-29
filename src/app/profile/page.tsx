@@ -1,6 +1,3 @@
-// 这是用户个人资料页面
-// 作为应届生，我会创建一个简单的个人资料管理页面
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -87,7 +84,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setProfileData((prevData) => {
-        // 只有当profileData.avatar为空或者是默认头像时才更新
         const shouldUpdateAvatar =
           !prevData.avatar ||
           prevData.avatar === user.image ||
@@ -134,7 +130,6 @@ export default function ProfilePage() {
   const loadUserItineraries = async () => {
     try {
       setIsLoadingItineraries(true);
-      console.log("🔍 开始加载用户行程，用户ID:", user.id);
 
       // 直接调用API获取行程
       const response = await fetch("/api/itineraries", {
@@ -146,7 +141,6 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("📋 API返回的行程数据:", result);
         if (result.success && result.data) {
           setItineraries(result.data);
           calculateTravelStats(result.data);
@@ -239,7 +233,6 @@ export default function ProfilePage() {
           );
           setMessage("计划删除成功！");
           setTimeout(() => setMessage(""), 3000);
-          console.log("✅ 行程删除成功");
         } else {
           setError(result.error || "删除失败，请稍后重试");
           setTimeout(() => setError(""), 3000);
@@ -346,12 +339,10 @@ export default function ProfilePage() {
               const updateResult = await updateResponse.json();
               if (updateResult.success) {
                 setMessage("头像上传并保存成功！");
-                console.log("✅ 头像已保存到数据库:", result.data.url);
 
                 // 更新 NextAuth session
                 try {
                   await update();
-                  console.log("✅ Session 已更新");
                 } catch (sessionError) {
                   console.error("更新 session 失败:", sessionError);
                 }
@@ -365,7 +356,6 @@ export default function ProfilePage() {
                     // 添加时间戳参数来避免缓存
                     const newSrc = `${result.data.url}?t=${Date.now()}`;
                     avatarImg.src = newSrc;
-                    console.log("🔄 强制刷新头像:", newSrc);
                   }
                 }, 100);
               } else {
@@ -462,7 +452,6 @@ export default function ProfilePage() {
       if (response.ok && result.success) {
         setMessage("个人资料更新成功！");
         setIsEditing(false);
-        console.log("✅ 个人资料更新成功:", result.data);
 
         // 更新本地状态
         setProfileData(prev => ({
@@ -476,7 +465,6 @@ export default function ProfilePage() {
         // 更新 NextAuth session
         try {
           await update();
-          console.log("✅ Session 已更新");
         } catch (sessionError) {
           console.error("更新 session 失败:", sessionError);
         }
@@ -485,7 +473,7 @@ export default function ProfilePage() {
         setTimeout(() => setMessage(""), 3000);
       } else {
         setError(result.error || "更新失败，请重试");
-        console.error("❌ 个人资料更新失败:", result.error);
+        console.error("个人资料更新失败:", result.error);
         setTimeout(() => setError(""), 3000);
       }
     } catch (error) {
@@ -750,13 +738,9 @@ export default function ProfilePage() {
                           }
                           alt="用户头像"
                           onLoad={() => {
-                            console.log("✅ 头像加载成功:", profileData.avatar);
                           }}
                           onError={(e) => {
-                            console.error(
-                              "❌ 头像加载失败:",
-                              profileData.avatar
-                            );
+
                             (
                               e.target as HTMLImageElement
                             ).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(

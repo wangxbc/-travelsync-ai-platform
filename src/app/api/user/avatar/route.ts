@@ -23,11 +23,6 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    console.log('💾 开始保存用户头像到数据库:', {
-      userId: session.user.id || session.user.email,
-      avatarUrl: avatarUrl
-    })
-
     // 使用数据库操作保存头像
     const updatedUser = await userOperations.updateAvatar(
       session.user.id || session.user.email, 
@@ -35,7 +30,6 @@ export async function PUT(request: NextRequest) {
     )
 
     if (updatedUser) {
-      console.log('✅ 头像保存到数据库成功:', updatedUser.avatar)
       
       return NextResponse.json({
         success: true,
@@ -48,7 +42,6 @@ export async function PUT(request: NextRequest) {
         }
       })
     } else {
-      console.error('❌ 头像保存到数据库失败')
       return NextResponse.json(
         { success: false, error: '头像保存失败' },
         { status: 500 }

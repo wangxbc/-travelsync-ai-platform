@@ -10,19 +10,17 @@ import { Button } from '@/components/ui/button'
 export default function CollaborationPage() {
   // 路由保护，确保用户已登录
   const { isAuthenticated, isLoading: authLoading } = useRequireAuth()
-  const user = { id: 'demo-user-1', name: '演示用户', avatar: null } // 模拟用户数据
+  const user = { id: 'demo-user-1', name: '演示用户', avatar: null } 
 
-  // 使用Socket Hook
   const { isConnected, messages, sendMessage, syncData, clearMessages } = useSocket()
 
-  // 状态管理
-  const [roomId, setRoomId] = useState('demo-room-1') // 房间ID
-  const [messageInput, setMessageInput] = useState('') // 消息输入
-  const [collaborativeData, setCollaborativeData] = useState<any[]>([]) // 协作数据
-  const [newItemInput, setNewItemInput] = useState('') // 新项目输入
-  const [showShareDialog, setShowShareDialog] = useState(false) // 显示分享对话框
-  const [shareLink, setShareLink] = useState('') // 分享链接
-  const [linkCopied, setLinkCopied] = useState(false) // 链接已复制状态
+  const [roomId, setRoomId] = useState('demo-room-1') 
+  const [messageInput, setMessageInput] = useState('') 
+  const [collaborativeData, setCollaborativeData] = useState<any[]>([])
+  const [newItemInput, setNewItemInput] = useState('') 
+  const [showShareDialog, setShowShareDialog] = useState(false) 
+  const [shareLink, setShareLink] = useState('') 
+  const [linkCopied, setLinkCopied] = useState(false) 
 
   // 使用房间Hook
   const { currentRoomId, userCount, users, isInRoom } = useRoom(roomId)
@@ -470,35 +468,7 @@ export default function CollaborationPage() {
           </motion.div>
         </div>
 
-        {/* 使用说明 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8"
-        >
-          <Card className="bg-blue-50 border border-blue-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                使用说明
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
-                <div className="space-y-2">
-                  <p>• 输入房间ID并点击"加入"进入协作房间</p>
-                  <p>• 在任务板中添加、编辑、删除任务，实时同步</p>
-                  <p>• 使用聊天功能与团队成员实时沟通</p>
-                </div>
-                <div className="space-y-2">
-                  <p>• 点击"分享"按钮生成邀请链接</p>
-                  <p>• 支持多人同时在线协作</p>
-                  <p>• 所有操作都会实时同步到其他成员</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+       
 
         {/* 分享对话框 */}
         <AnimatePresence>

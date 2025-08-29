@@ -1,6 +1,3 @@
-// 简单的认证系统 - 不依赖数据库
-// 用于解决Vercel部署时的数据库连接问题
-
 interface SocialLinks {
   twitter?: string
   facebook?: string
@@ -42,8 +39,7 @@ interface SimpleUser {
 class SimpleAuthManager {
   private static instance: SimpleAuthManager
   private users: Map<string, SimpleUser> = new Map()
-  private emailIndex: Map<string, string> = new Map() // email -> id mapping
-
+  private emailIndex: Map<string, string> = new Map()
   private constructor() {
     this.initializeDefaultUsers()
   }
@@ -98,8 +94,6 @@ class SimpleAuthManager {
       this.users.set(user.id, user)
       this.emailIndex.set(user.email, user.id)
     })
-
-    console.log(`🔄 简单认证系统已初始化，包含 ${this.users.size} 个默认用户`)
   }
 
   private generateId(): string {
@@ -123,7 +117,6 @@ class SimpleAuthManager {
     name: string
     password: string
   }): Promise<SimpleUser> {
-    // 检查用户是否已存在
     if (this.emailIndex.has(userData.email)) {
       throw new Error('用户已存在')
     }
@@ -138,7 +131,6 @@ class SimpleAuthManager {
     this.users.set(user.id, user)
     this.emailIndex.set(user.email, user.id)
 
-    console.log('✅ 用户创建成功（简单认证）:', user.email)
     return user
   }
 
@@ -152,19 +144,17 @@ class SimpleAuthManager {
     const updatedUser: SimpleUser = {
       ...user,
       ...updates,
-      id, // 确保ID不被修改
+      id,
       updatedAt: new Date(),
     }
 
     this.users.set(id, updatedUser)
 
-    // 如果邮箱被更新，需要更新索引
     if (updates.email && updates.email !== user.email) {
       this.emailIndex.delete(user.email)
       this.emailIndex.set(updates.email, id)
     }
 
-    console.log('✅ 用户更新成功（简单认证）:', updatedUser.email)
     return updatedUser
   }
 
@@ -177,7 +167,6 @@ class SimpleAuthManager {
       return null
     }
 
-    // 返回用户信息（不包含密码）
     const { password: _, ...userWithoutPassword } = user
     return userWithoutPassword as SimpleUser
   }
@@ -201,33 +190,24 @@ class SimpleAuthManager {
     }
   }
 
-  // 获取用户列表（用于调试）
   debugGetAllUsers(): SimpleUser[] {
     return Array.from(this.users.values())
   }
-
-  // 清空所有用户（用于测试）
   clearUsers(): void {
     this.users.clear()
     this.emailIndex.clear()
-    console.log('🧹 已清空所有用户数据（简单认证）')
   }
 
-  // 重置为默认用户
   resetToDefaults(): void {
     this.clearUsers()
     this.initializeDefaultUsers()
-    console.log('🔄 已重置为默认用户（简单认证）')
   }
 }
 
-// 导出单例实例
 export const simpleAuthManager = SimpleAuthManager.getInstance()
 
-// 导出类型
 export type { SimpleUser }
 
-// 兼容性函数
 export const getUsers = async () => {
   return await simpleAuthManager.getAllUsers()
 }

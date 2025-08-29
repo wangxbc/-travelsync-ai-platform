@@ -8,7 +8,6 @@ import { useToast } from "@/components/ui/Toast";
 import type { TravelInput, Itinerary } from "@/types";
 import type { DayPlan, Activity } from "@/types";
 
-// 使用现代emoji图标，更简洁美观
 
 export default function PlanningPage() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -27,12 +26,12 @@ export default function PlanningPage() {
 
   // 表单状态
   const [formData, setFormData] = useState<TravelInput>({
-    departure: "", // 出发地
-    destination: "", // 目的地
-    budget: 2000, // 预算
-    days: 3, // 天数
-    interests: [], // 兴趣偏好
-    travelStyle: "comfort", // 旅行风格
+    departure: "",
+    destination: "", 
+    budget: 2000,
+    days: 3, 
+    interests: [], 
+    travelStyle: "comfort",
   });
 
   // 生成的行程
@@ -42,7 +41,6 @@ export default function PlanningPage() {
   // 当前显示的天数（从0开始）
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
-  // 保留的活动ID集合
   const [lockedActivities, setLockedActivities] = useState<Set<string>>(
     new Set()
   );
@@ -50,7 +48,6 @@ export default function PlanningPage() {
   // 错误信息
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 如果正在加载或未认证，显示加载状态
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,8 +59,6 @@ export default function PlanningPage() {
     );
   }
 
-  // 处理表单输入变化
-  // 处理表单输入变化
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {

@@ -1,5 +1,3 @@
-// 简单的行程管理系统 - 不依赖数据库
-
 interface ItineraryData {
   activities?: any[]
   locations?: any[]

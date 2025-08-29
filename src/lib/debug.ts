@@ -1,4 +1,3 @@
-// 调试工具 - 可在浏览器控制台中使用
 import { getUserManager } from "./auth";
 
 // 全局调试对象
@@ -42,7 +41,7 @@ export const showUsers = () => {
     const userManager = getUserManager();
     const users = userManager.getUsers();
 
-    console.log("👥 当前用户列表:");
+    console.log("当前用户列表:");
     if (users.length === 0) {
       console.log("  暂无用户数据");
     } else {

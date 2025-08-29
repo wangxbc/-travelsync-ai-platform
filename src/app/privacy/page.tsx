@@ -1,6 +1,3 @@
-// 隐私政策页面
-// 作为应届生，我会创建一个基础的隐私政策页面
-
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -93,7 +90,7 @@ export default function PrivacyPage() {
             <p className="mb-4">如果您对此隐私政策有任何问题，请联系我们：</p>
             <div className="bg-gray-50 p-4 rounded-lg">
               <p>邮箱: privacy@travelsync.com</p>
-              <p>地址: 北京市朝阳区xxx路xxx号</p>
+              <p>地址: 河南省 郑州市 金水区 金水区xxx路xxx号</p>
               <p>电话: 400-xxx-xxxx</p>
             </div>
           </div>

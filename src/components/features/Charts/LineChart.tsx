@@ -1,6 +1,3 @@
-// 这是折线图组件
-// 作为应届生，我会使用Recharts创建一个简单的折线图
-
 'use client'
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'

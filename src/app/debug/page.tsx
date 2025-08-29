@@ -77,7 +77,7 @@ export default function DebugPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-900 mb-8">
-          🔧 用户数据调试工具
+          用户数据调试工具
         </h1>
 
         {message && (
@@ -92,32 +92,32 @@ export default function DebugPage() {
             onClick={handleRecoverUsers}
             className="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            🔄 恢复用户数据
+            恢复用户数据
           </button>
           <button
             onClick={handleDebugLocalStorage}
             className="p-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
           >
-            🐛 调试localStorage
+            调试localStorage
           </button>
           <button
             onClick={handleCreateDefaultUsers}
             className="p-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
           >
-            ➕ 创建默认用户
+            创建默认用户
           </button>
           <button
             onClick={handleResetUsers}
             className="p-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
           >
-            🗑️ 重置用户数据
+            重置用户数据
           </button>
         </div>
 
         {/* 当前用户列表 */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">
-            👥 当前用户列表
+            当前用户列表
           </h2>
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
             {users.length === 0 ? (
@@ -182,7 +182,7 @@ export default function DebugPage() {
         {/* localStorage数据 */}
         <div>
           <h2 className="text-xl font-semibold text-slate-900 mb-4">
-            💾 localStorage数据
+            localStorage数据
           </h2>
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="space-y-4">
@@ -202,34 +202,6 @@ export default function DebugPage() {
                 ))
               )}
             </div>
-          </div>
-        </div>
-
-        {/* 使用说明 */}
-        <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">
-            📋 使用说明
-          </h3>
-          <div className="space-y-2 text-sm text-blue-800">
-            <p>
-              • <strong>恢复用户数据</strong>
-              ：尝试从localStorage中恢复丢失的用户账户
-            </p>
-            <p>
-              • <strong>调试localStorage</strong>
-              ：在浏览器控制台输出详细的调试信息
-            </p>
-            <p>
-              • <strong>创建默认用户</strong>：创建测试账户（admin@example.com /
-              123456）
-            </p>
-            <p>
-              • <strong>重置用户数据</strong>：清空所有用户数据（谨慎使用）
-            </p>
-            <p>
-              • 如果恢复的用户显示"已恢复"状态，默认密码为：
-              <code className="bg-blue-100 px-1 rounded">123456</code>
-            </p>
           </div>
         </div>
       </div>

@@ -1,6 +1,3 @@
-// 徽章组件
-// 作为应届生，我会创建一个简单的徽章组件
-
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"

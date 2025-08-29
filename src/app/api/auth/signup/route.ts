@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         email,
         name,
         preferences: {
-          password: password, // 临时存储，实际应该加密
+          password: password, 
           theme: 'light',
           language: 'zh-CN',
         },

@@ -1,34 +1,24 @@
-// 这是应用的全局状态管理
-// 作为应届生，我会使用Zustand创建一个简单的状态管理
-
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import type { User, Itinerary, TravelInput } from '@/types'
 
-// 应用状态接口
 interface AppState {
-  // 用户相关状态
   user: User | null
   isAuthenticated: boolean
   
-  // 行程相关状态
   currentItinerary: Itinerary | null
   itineraries: Itinerary[]
   
-  // AI生成相关状态
   isGenerating: boolean
   generationProgress: number
   
-  // 地图相关状态
   mapCenter: [number, number]
   mapZoom: number
   selectedLocation: string | null
   
-  // UI相关状态
   sidebarOpen: boolean
   theme: 'light' | 'dark'
   
-  // 操作方法
   setUser: (user: User | null) => void
   setAuthenticated: (authenticated: boolean) => void
   setCurrentItinerary: (itinerary: Itinerary | null) => void
@@ -46,7 +36,6 @@ interface AppState {
   reset: () => void
 }
 
-// 初始状态
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -54,26 +43,23 @@ const initialState = {
   itineraries: [],
   isGenerating: false,
   generationProgress: 0,
-  mapCenter: [116.4074, 39.9042] as [number, number], // 默认北京
+  mapCenter: [116.4074, 39.9042] as [number, number],
   mapZoom: 10,
   selectedLocation: null,
   sidebarOpen: true,
   theme: 'light' as const
 }
 
-// 创建状态管理store
 export const useAppStore = create<AppState>()(
   devtools(
     persist(
       (set, get) => ({
         ...initialState,
 
-        // 用户相关操作
         setUser: (user) => set({ user }, false, 'setUser'),
         
         setAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }, false, 'setAuthenticated'),
 
-        // 行程相关操作
         setCurrentItinerary: (itinerary) => set({ currentItinerary: itinerary }, false, 'setCurrentItinerary'),
         
         setItineraries: (itineraries) => set({ itineraries }, false, 'setItineraries'),
@@ -106,30 +92,25 @@ export const useAppStore = create<AppState>()(
           'removeItinerary'
         ),
 
-        // AI生成相关操作
         setGenerating: (generating) => set({ isGenerating: generating }, false, 'setGenerating'),
         
         setGenerationProgress: (progress) => set({ generationProgress: progress }, false, 'setGenerationProgress'),
 
-        // 地图相关操作
         setMapCenter: (center) => set({ mapCenter: center }, false, 'setMapCenter'),
         
         setMapZoom: (zoom) => set({ mapZoom: zoom }, false, 'setMapZoom'),
         
         setSelectedLocation: (locationId) => set({ selectedLocation: locationId }, false, 'setSelectedLocation'),
 
-        // UI相关操作
         setSidebarOpen: (open) => set({ sidebarOpen: open }, false, 'setSidebarOpen'),
         
         setTheme: (theme) => set({ theme }, false, 'setTheme'),
 
-        // 重置状态
         reset: () => set(initialState, false, 'reset')
       }),
       {
-        name: 'travelsync-app-store', // 本地存储的键名
+        name: 'travelsync-app-store',
         partialize: (state) => ({
-          // 只持久化部分状态
           theme: state.theme,
           sidebarOpen: state.sidebarOpen,
           mapCenter: state.mapCenter,
@@ -138,12 +119,11 @@ export const useAppStore = create<AppState>()(
       }
     ),
     {
-      name: 'TravelSync App Store' // DevTools中显示的名称
+      name: 'TravelSync App Store'
     }
   )
 )
 
-// 选择器Hook（用于性能优化）
 export const useUser = () => useAppStore((state) => state.user)
 export const useIsAuthenticated = () => useAppStore((state) => state.isAuthenticated)
 export const useCurrentItinerary = () => useAppStore((state) => state.currentItinerary)

@@ -48,13 +48,10 @@ export async function POST(request: NextRequest) {
       // 确保uploads目录存在
       if (!existsSync(uploadDir)) {
         await mkdir(uploadDir, { recursive: true })
-        console.log('📁 创建uploads目录:', uploadDir)
       }
 
       await writeFile(filepath, buffer)
-      console.log('✅ 文件保存成功:', filepath)
     } catch (writeError) {
-      console.error('❌ 文件保存失败:', writeError)
       return NextResponse.json(
         { success: false, error: '文件保存失败' },
         { status: 500 }

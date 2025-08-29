@@ -1,6 +1,3 @@
-// 这是AI生成行程的API路由
-// 作为应届生，我会创建一个简单但功能完整的API端点
-
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

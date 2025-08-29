@@ -1,6 +1,3 @@
-// 这是AI优化行程的API路由
-// 作为应届生，我会创建一个用于优化现有行程的API端点
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

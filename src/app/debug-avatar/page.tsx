@@ -16,10 +16,10 @@ export default function DebugAvatarPage() {
       // 调用session更新
       const updatedSession = await update();
       
-      setDebugInfo(prev => prev + "\n✅ Session更新成功");
+      setDebugInfo(prev => prev + "\nSession更新成功");
       console.log("更新后的session:", updatedSession);
     } catch (error) {
-      setDebugInfo(prev => prev + "\n❌ Session更新失败: " + error);
+      setDebugInfo(prev => prev + "\nSession更新失败: " + error);
       console.error("Session更新失败:", error);
     }
   };
@@ -31,9 +31,9 @@ export default function DebugAvatarPage() {
       const response = await fetch("/api/user/profile");
       const result = await response.json();
       
-      setDebugInfo(prev => prev + "\n✅ 用户API响应: " + JSON.stringify(result, null, 2));
+      setDebugInfo(prev => prev + "\n用户API响应: " + JSON.stringify(result, null, 2));
     } catch (error) {
-      setDebugInfo(prev => prev + "\n❌ 用户API失败: " + error);
+      setDebugInfo(prev => prev + "\n用户API失败: " + error);
     }
   };
 

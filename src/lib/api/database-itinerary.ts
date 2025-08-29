@@ -1,8 +1,6 @@
-// 数据库行程管理系统 - 替代simple-itinerary
 import { prisma } from '@/lib/prisma'
 import type { Itinerary, Activity, Location } from '@prisma/client'
 
-// 行程数据接口
 interface ItineraryData {
   activities?: any[]
   locations?: any[]
@@ -17,7 +15,6 @@ interface ItineraryData {
   }
 }
 
-// 活动元数据接口
 interface ActivityMetadata {
   bookingInfo?: {
     confirmationNumber?: string
@@ -29,7 +26,6 @@ interface ActivityMetadata {
   tags?: string[]
 }
 
-// 位置元数据接口
 interface LocationMetadata {
   photos?: string[]
   reviews?: Array<{
@@ -45,7 +41,6 @@ interface LocationMetadata {
   }
 }
 
-// 数据库行程管理器
 class DatabaseItineraryManager {
   private static instance: DatabaseItineraryManager
 
@@ -62,10 +57,8 @@ class DatabaseItineraryManager {
 
   private async initializeDefaultData() {
     try {
-      // 检查是否已有默认地点
       const existingLocations = await prisma.location.count()
       if (existingLocations === 0) {
-        console.log('📍 创建默认地点...')
 
         const defaultLocations = [
           {
@@ -103,14 +96,12 @@ class DatabaseItineraryManager {
           })
         }
 
-        console.log(`✅ 默认地点创建完成，共 ${defaultLocations.length} 个地点`)
       }
     } catch (error) {
-      console.error('❌ 初始化默认数据失败:', error)
+      console.error('初始化默认数据失败:', error)
     }
   }
 
-  // 创建行程
   async createItinerary(itineraryData: {
     userId: string
     title: string
@@ -128,15 +119,13 @@ class DatabaseItineraryManager {
           activities: true,
         },
       })
-      console.log('✅ 行程创建成功:', itinerary.title)
       return itinerary
     } catch (error) {
-      console.error('❌ 创建行程失败:', error)
+      console.error('创建行程失败:', error)
       return null
     }
   }
 
-  // 根据ID查找行程
   async findItineraryById(id: string): Promise<Itinerary | null> {
     try {
       const itinerary = await prisma.itinerary.findUnique({
@@ -154,12 +143,11 @@ class DatabaseItineraryManager {
       })
       return itinerary
     } catch (error) {
-      console.error('❌ 查找行程失败:', error)
+      console.error('查找行程失败:', error)
       return null
     }
   }
 
-  // 根据用户ID查找行程
   async findItinerariesByUserId(userId: string): Promise<Itinerary[]> {
     try {
       const itineraries = await prisma.itinerary.findMany({
@@ -176,26 +164,23 @@ class DatabaseItineraryManager {
       })
       return itineraries
     } catch (error) {
-      console.error('❌ 查找用户行程失败:', error)
+      console.error('查找用户行程失败:', error)
       return []
     }
   }
 
-  // 删除行程
   async deleteItinerary(id: string): Promise<boolean> {
     try {
       await prisma.itinerary.delete({
         where: { id },
       })
-      console.log('✅ 行程删除成功:', id)
       return true
     } catch (error) {
-      console.error('❌ 删除行程失败:', error)
+      console.error('删除行程失败:', error)
       return false
     }
   }
 
-  // 根据ID查找地点
   async findLocationById(id: string): Promise<Location | null> {
     try {
       const location = await prisma.location.findUnique({
@@ -203,12 +188,11 @@ class DatabaseItineraryManager {
       })
       return location
     } catch (error) {
-      console.error('❌ 查找地点失败:', error)
+      console.error('查找地点失败:', error)
       return null
     }
   }
 
-  // 根据名称搜索地点
   async searchLocationsByName(
     name: string,
     limit: number = 10
@@ -225,12 +209,11 @@ class DatabaseItineraryManager {
       })
       return locations
     } catch (error) {
-      console.error('❌ 搜索地点失败:', error)
+      console.error('搜索地点失败:', error)
       return []
     }
   }
 
-  // 创建地点
   async createLocation(locationData: {
     name: string
     address?: string
@@ -245,7 +228,6 @@ class DatabaseItineraryManager {
       const location = await prisma.location.create({
         data: locationData,
       })
-      console.log('✅ 地点创建成功:', location.name)
       return location
     } catch (error) {
       console.error('❌ 创建地点失败:', error)
@@ -253,7 +235,6 @@ class DatabaseItineraryManager {
     }
   }
 
-  // 创建活动
   async createActivity(activityData: {
     itineraryId: string
     locationId?: string
@@ -274,15 +255,13 @@ class DatabaseItineraryManager {
           location: true,
         },
       })
-      console.log('✅ 活动创建成功:', activity.name)
       return activity
     } catch (error) {
-      console.error('❌ 创建活动失败:', error)
+      console.error('创建活动失败:', error)
       return null
     }
   }
 
-  // 根据行程ID查找活动
   async findActivitiesByItineraryId(itineraryId: string): Promise<Activity[]> {
     try {
       const activities = await prisma.activity.findMany({
@@ -294,12 +273,11 @@ class DatabaseItineraryManager {
       })
       return activities
     } catch (error) {
-      console.error('❌ 查找行程活动失败:', error)
+      console.error('查找行程活动失败:', error)
       return []
     }
   }
 
-  // 更新行程
   async updateItinerary(
     id: string,
     updateData: any
@@ -313,15 +291,13 @@ class DatabaseItineraryManager {
           activities: true,
         },
       })
-      console.log('✅ 行程更新成功:', itinerary.title)
       return itinerary
     } catch (error) {
-      console.error('❌ 更新行程失败:', error)
+      console.error('更新行程失败:', error)
       return null
     }
   }
 
-  // 更新活动
   async updateActivity(id: string, updateData: any): Promise<Activity | null> {
     try {
       const activity = await prisma.activity.update({
@@ -331,29 +307,25 @@ class DatabaseItineraryManager {
           location: true,
         },
       })
-      console.log('✅ 活动更新成功:', activity.name)
       return activity
     } catch (error) {
-      console.error('❌ 更新活动失败:', error)
+      console.error('更新活动失败:', error)
       return null
     }
   }
 
-  // 删除活动
   async deleteActivity(id: string): Promise<boolean> {
     try {
       await prisma.activity.delete({
         where: { id },
       })
-      console.log('✅ 活动删除成功:', id)
       return true
     } catch (error) {
-      console.error('❌ 删除活动失败:', error)
+      console.error('删除活动失败:', error)
       return false
     }
   }
 
-  // 获取统计信息
   async getStats() {
     try {
       const [itineraryCount, activityCount, locationCount] = await Promise.all([
@@ -369,7 +341,7 @@ class DatabaseItineraryManager {
         type: 'database',
       }
     } catch (error) {
-      console.error('❌ 获取统计信息失败:', error)
+      console.error('获取统计信息失败:', error)
       return {
         itineraries: 0,
         activities: 0,
@@ -380,8 +352,6 @@ class DatabaseItineraryManager {
   }
 }
 
-// 导出单例实例
 export const databaseItineraryManager = DatabaseItineraryManager.getInstance()
 
-// 导出类型
 export type { ItineraryData, ActivityMetadata, LocationMetadata }

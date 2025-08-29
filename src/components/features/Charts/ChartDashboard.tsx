@@ -1,6 +1,3 @@
-// 图表仪表板组件
-// 作为应届生，我会创建一个展示多个图表的仪表板
-
 'use client'
 
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'

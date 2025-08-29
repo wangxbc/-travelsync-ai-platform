@@ -1,6 +1,3 @@
-// 这是用户注册页面
-// 作为应届生，我会创建一个简单的注册表单
-
 "use client";
 
 import { useState } from "react";
@@ -12,16 +9,16 @@ import { useToast } from "@/components/ui/Toast";
 export default function SignUpPage() {
   // 状态管理
   const [formData, setFormData] = useState({
-    name: "", // 用户姓名
-    email: "", // 邮箱地址
-    password: "", // 密码
-    confirmPassword: "", // 确认密码
+    name: "", 
+    email: "", 
+    password: "", 
+    confirmPassword: "",
   });
-  const [error, setError] = useState(""); // 错误信息
-  const [isSubmitting, setIsSubmitting] = useState(false); // 提交状态
+  const [error, setError] = useState(""); 
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const router = useRouter(); // 路由对象
-  const { showSuccessToast, showErrorToast } = useToast(); // Toast提示
+  const { showSuccessToast, showErrorToast } = useToast(); 
 
   // 处理输入变化
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,14 +110,13 @@ export default function SignUpPage() {
       setError("注册过程中出现错误，请稍后重试");
       showErrorToast("注册过程中出现错误，请稍后重试");
     } finally {
-      setIsSubmitting(false); // 清除提交状态
+      setIsSubmitting(false); 
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* 页面标题 */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             注册TravelSync账户
@@ -136,10 +132,8 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        {/* 注册表单 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* 姓名输入框 */}
             <div>
               <label
                 htmlFor="name"
@@ -161,7 +155,6 @@ export default function SignUpPage() {
               />
             </div>
 
-            {/* 邮箱输入框 */}
             <div>
               <label
                 htmlFor="email"
@@ -228,14 +221,12 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* 错误信息显示 */}
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
 
-          {/* 服务条款同意 */}
           <div className="flex items-center">
             <input
               id="agree-terms"
@@ -265,7 +256,6 @@ export default function SignUpPage() {
             </label>
           </div>
 
-          {/* 注册按钮 */}
           <div>
             <button
               type="submit"
@@ -303,7 +293,6 @@ export default function SignUpPage() {
           </div>
         </form>
 
-        {/* 注册说明 */}
         <div className="mt-6 p-4 bg-blue-50 rounded-md">
           <p className="text-sm text-blue-700">
             注册后您将可以：

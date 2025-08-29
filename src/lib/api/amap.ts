@@ -16,7 +16,6 @@ export async function searchAmapPOI({
   try {
     console.log(`搜索高德地图POI: ${city} - ${keywords}`);
 
-    // 构建优化的搜索URL，添加排序参数优先显示热门POI
     const url = `https://restapi.amap.com/v3/place/text?key=${AMAP_KEY}&keywords=${encodeURIComponent(
       keywords
     )}&city=${encodeURIComponent(
@@ -43,22 +42,18 @@ export async function searchAmapPOI({
         city: poi.cityname,
         adname: poi.adname,
         tag: keywords,
-        // 添加更多有用的字段
         business_area: poi.business_area,
         distance: poi.distance,
         pcode: poi.pcode,
         adcode: poi.adcode,
-        // 尝试从高德API获取评分信息
         rating: poi.rating || poi.biz_ext?.rating,
         cost: poi.biz_ext?.cost,
-        // 添加热门度指标
         popularity_score: calculateInitialPopularityScore(poi),
       }));
 
       console.log(`找到${pois.length}个POI`);
       
-      // 对结果进行初步排序，优先显示热门POI
-      const sortedPois = pois.sort((a, b) => {
+      const sortedPois = pois.sort((a: any, b: any) => {
         return (b.popularity_score || 0) - (a.popularity_score || 0);
       });
       
@@ -69,24 +64,19 @@ export async function searchAmapPOI({
     }
   } catch (error) {
     console.error("高德地图API调用失败:", error);
-
-    // 返回模拟数据
     return generateMockAmapPOIs(city, keywords);
   }
 }
 
-// 计算初始热门度分数（基于高德API返回的数据）
 function calculateInitialPopularityScore(poi: any): number {
   let score = 0;
   
-  // 基于POI名称的知名度
   const name = poi.name || '';
   const famousBrands = ['万达', '银泰', '大悦城', '新世纪', '王府井', '西单', '海底捞', '星巴克'];
   if (famousBrands.some(brand => name.includes(brand))) {
     score += 50;
   }
   
-  // 基于POI类型的热门度
   const type = poi.type || '';
   if (type.includes('风景名胜') || type.includes('旅游景点')) {
     score += 40;
@@ -96,18 +86,15 @@ function calculateInitialPopularityScore(poi: any): number {
     score += 30;
   }
   
-  // 基于商圈位置
   const businessArea = poi.business_area || '';
   if (businessArea.includes('市中心') || businessArea.includes('CBD')) {
     score += 30;
   }
   
-  // 基于评分（如果有）
   if (poi.rating) {
-    score += poi.rating * 5; // 评分乘以5
+    score += poi.rating * 5;
   }
   
-  // 基于距离（距离越近，分数稍高）
   if (poi.distance && poi.distance < 1000) {
     score += 10;
   }
@@ -115,14 +102,12 @@ function calculateInitialPopularityScore(poi: any): number {
   return score;
 }
 
-// 生成模拟高德地图POI数据 - 优化版本，优先生成热门POI
 function generateMockAmapPOIs(city: string, keywords: string) {
   console.log(`生成模拟POI数据: ${city} - ${keywords}`);
 
-  const mockPOIs = [];
+  const mockPOIs: any[] = [];
   const baseCoords = getBaseCityCoords(city);
 
-  // 根据关键词生成高质量的热门POI
   if (keywords.includes("5A景区") || keywords.includes("4A景区") || keywords.includes("著名景点") || keywords.includes("热门景点")) {
     mockPOIs.push(
       {
@@ -239,7 +224,6 @@ function generateMockAmapPOIs(city: string, keywords: string) {
     });
   }
 
-  // 如果没有匹配的关键词，添加通用热门POI
   if (mockPOIs.length === 0) {
     mockPOIs.push(
       {
@@ -277,7 +261,6 @@ function generateMockAmapPOIs(city: string, keywords: string) {
   return mockPOIs;
 }
 
-// 获取城市基础坐标
 function getBaseCityCoords(city: string): { lng: number; lat: number } {
   const cityCoords: Record<string, { lng: number; lat: number }> = {
     '北京': { lng: 116.4074, lat: 39.9042 },
@@ -292,15 +275,14 @@ function getBaseCityCoords(city: string): { lng: number; lat: number } {
     '重庆': { lng: 106.5516, lat: 29.5630 },
   };
   
-  return cityCoords[city] || { lng: 116.4074, lat: 39.9042 }; // 默认北京坐标
+  return cityCoords[city] || { lng: 116.4074, lat: 39.9042 };
 }
 
-// 生成增强的模拟POI数据 - 用于API限额时的备用方案
 export function generateEnhancedMockPOIs(city: string, keywords: string) {
   console.log(`生成增强模拟POI数据: ${city} - ${keywords}`);
 
   const baseCoords = getBaseCityCoords(city);
-  const mockPOIs = [];
+  const mockPOIs: any[] = [];
 
   if (keywords.includes("热门景点")) {
     mockPOIs.push(

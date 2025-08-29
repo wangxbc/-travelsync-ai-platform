@@ -1,6 +1,3 @@
-// 基础输入框组件
-// 作为应届生，我会创建一个简单的输入框组件
-
 import * as React from "react"
 import { cn } from "@/lib/utils"
 

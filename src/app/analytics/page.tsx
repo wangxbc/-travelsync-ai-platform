@@ -1,6 +1,3 @@
-// 这是数据分析页面
-// 作为应届生，我会创建一个展示各种图表的分析页面
-
 "use client";
 
 import { useEffect, useState } from "react";

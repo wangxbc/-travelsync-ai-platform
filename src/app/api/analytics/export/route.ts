@@ -1,6 +1,3 @@
-// 这是数据导出的API路由
-// 作为应届生，我会创建一个简单的数据导出功能
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -25,10 +22,10 @@ export async function GET(request: NextRequest) {
 
     // 获取查询参数
     const { searchParams } = new URL(request.url)
-    const format = searchParams.get('format') || 'json' // 导出格式：json, csv
-    const type = searchParams.get('type') || 'itineraries' // 数据类型：itineraries, actions
-    const startDate = searchParams.get('startDate') // 开始日期
-    const endDate = searchParams.get('endDate') // 结束日期
+    const format = searchParams.get('format') || 'json' 
+    const type = searchParams.get('type') || 'itineraries' 
+    const startDate = searchParams.get('startDate') 
+    const endDate = searchParams.get('endDate') 
 
     console.log('数据导出请求:', {
       format,

@@ -1,6 +1,3 @@
-// 这是AI流式生成行程的API路由
-// 作为应届生，我会实现流式响应来提升用户体验
-
 import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

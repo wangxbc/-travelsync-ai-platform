@@ -1,4 +1,3 @@
-// 修复版本的OpenAI API调用函数
 import OpenAI from "openai";
 import type { TravelInput, Itinerary } from "@/types";
 
@@ -6,7 +5,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// 真实的12306票价数据库
 const REAL_TRAIN_PRICES: Record<string, Record<string, number>> = {
   北京: {
     上海: 156.5,
@@ -64,7 +62,6 @@ const REAL_TRAIN_PRICES: Record<string, Record<string, number>> = {
   },
 };
 
-// 计算真实交通费用
 function calculateRealTransportationCost(
   departure?: string,
   destination?: string
@@ -90,7 +87,6 @@ function calculateRealTransportationCost(
   };
 }
 
-// 生成每日活动（支持锁定和去重）
 function generateDayActivities(
   day: number,
   destinationData: any,
@@ -105,7 +101,6 @@ function generateDayActivities(
   const activities = [];
   let currentBudget = dailyBudget;
 
-  // 如果有锁定的活动，先保留它们
   if (existingDayData?.activities && lockedActivities.length > 0) {
     for (const activity of existingDayData.activities) {
       if (lockedActivities.includes(activity.id)) {
@@ -116,7 +111,6 @@ function generateDayActivities(
     }
   }
 
-  // 智能兴趣-时间段匹配
   function matchInterestToSlot(interest, slotType) {
     if (interest === "美食体验" && slotType === "restaurant") return true;
     if (
@@ -138,11 +132,9 @@ function generateDayActivities(
     { label: "晚上", start: "18:00", end: "20:00", type: "restaurant" },
   ];
 
-  // 标记每个兴趣是否已分配
   const interestAssigned = {};
   interests.forEach((i) => (interestAssigned[i] = false));
 
-  // 1. 先处理锁定活动（existingDayData.activities + lockedActivities）
   const lockedSlotIndexes = new Set();
   if (existingDayData?.activities && lockedActivities.length > 0) {
     for (let i = 0; i < existingDayData.activities.length; i++) {
@@ -165,7 +157,6 @@ function generateDayActivities(
     }
   }
 
-  // 2. 剩余时间段循环分配兴趣，优先兴趣相关活动
   let interestIdx = 0;
   for (let i = 0; i < timeSlots.length; i++) {
     if (lockedSlotIndexes.has(i)) continue;
@@ -173,7 +164,6 @@ function generateDayActivities(
     let activity = null;
     let matchedInterest = null;
     let triedInterests = 0;
-    // 循环分配兴趣，直到找到可用活动或所有兴趣都试过
     while (triedInterests < interests.length) {
       const interest = interests[interestIdx % interests.length];
       const candidates =
@@ -196,7 +186,6 @@ function generateDayActivities(
       interestIdx++;
       triedInterests++;
     }
-    // 没有兴趣相关就补充同类活动
     if (!activity) {
       if (slot.type === "attraction") {
         activity = (destinationData.attractions || []).find(
@@ -208,7 +197,6 @@ function generateDayActivities(
         );
       }
     }
-    // 还没有就兜底
     if (!activity) {
       activity = {
         name: "自由活动",
@@ -230,7 +218,6 @@ function generateDayActivities(
   return activities;
 }
 
-// 根据兴趣偏好生成活动
 function generateActivitiesByInterests(
   interests: string[],
   destinationData: any,
@@ -250,7 +237,6 @@ function generateActivitiesByInterests(
     availableRestaurants.length
   );
 
-  // 如果没有选择兴趣，默认推荐一些活动
   if (interests.length === 0) {
     interests = ["历史文化", "美食体验"];
   }
@@ -324,7 +310,6 @@ function generateActivitiesByInterests(
         break;
 
       default:
-        // 其他兴趣，随机选择一个未使用的景点
         activity = availableAttractions.find(
           (a) => !usedActivities.has(a.name)
         );
@@ -346,7 +331,6 @@ function generateActivitiesByInterests(
     }
   }
 
-  // 如果活动不够，补充一些基础活动
   while (activities.length < 3 && availableAttractions.length > 0) {
     const remainingAttractions = availableAttractions.filter(
       (a) => !usedActivities.has(a.name)
@@ -371,28 +355,24 @@ function generateActivitiesByInterests(
   return activities;
 }
 
-// 获取时间段
 function getTimeSlot(index: number): string {
   const times = ["09:00", "11:00", "14:00", "16:00", "18:00"];
   return times[index] || "19:00";
 }
 
-// 智能生成行程（修复版）
 function generateMockItinerary(input: TravelInput): Itinerary {
   console.log("生成修复版行程，输入:", input);
 
-  // 计算真实交通费用
   const transportationCost = calculateRealTransportationCost(
     input.departure,
     input.destination
   );
 
-  // 获取目的地数据
   const destinationData = getDestinationData(input.destination);
 
   const mockDays = [];
   const dailyBudget = Math.floor(input.budget / input.days);
-  const usedActivities = new Set<string>(); // 全局去重
+  const usedActivities = new Set<string>();
 
   for (let i = 1; i <= input.days; i++) {
     const date = new Date();
@@ -457,13 +437,13 @@ function generateMockItinerary(input: TravelInput): Itinerary {
         shopping: Math.floor(input.budget * 0.1),
       },
       tips: [
-        `🚄 交通费用：${transportationCost.details}`,
-        `💰 预算分析：总预算¥${input.budget}，实际需要¥${totalActualCost}`,
+        `交通费用：${transportationCost.details}`,
+        `预算分析：总预算¥${input.budget}，实际需要¥${totalActualCost}`,
         totalActualCost <= input.budget
-          ? "✅ 预算充足，可以安心出行"
-          : "⚠️ 预算略紧，建议适当调整",
-        "🔒 点击活动旁的锁定按钮可保留喜欢的安排",
-        "🔄 重新生成时会保持锁定的活动不变",
+          ? "预算充足，可以安心出行"
+          : "预算略紧，建议适当调整",
+        "点击活动旁的锁定按钮可保留喜欢的安排",
+        "重新生成时会保持锁定的活动不变",
       ],
       originalInput: input,
       generatedAt: new Date().toISOString(),
@@ -474,7 +454,6 @@ function generateMockItinerary(input: TravelInput): Itinerary {
   };
 }
 
-// 获取目的地数据
 function getDestinationData(destination: string) {
   const destinations: Record<string, any> = {
     邯郸: {
@@ -737,7 +716,6 @@ function getDestinationData(destination: string) {
   );
 }
 
-// 主要的生成函数
 export async function generateItinerary(
   input: TravelInput
 ): Promise<Itinerary | null> {
@@ -752,8 +730,6 @@ export async function generateItinerary(
       return generateMockItinerary(input);
     }
 
-    // 这里可以添加真实的OpenAI API调用
-    // 暂时使用修复版模拟数据
     return generateMockItinerary(input);
   } catch (error) {
     console.error("生成行程规划失败:", error);
@@ -771,5 +747,5 @@ export async function optimizeItinerary(
   itinerary: Itinerary,
   feedback: string
 ): Promise<Itinerary | null> {
-  return itinerary; // 简单返回原行程
+  return itinerary;
 }

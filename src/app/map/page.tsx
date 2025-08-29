@@ -1,201 +1,3 @@
-// 这是3D地图页面
-// 作为应届生，我会创建一个基础的地图展示页面
-
-// 'use client'
-
-// import { useState } from 'react'
-// import { useRequireAuth } from '@/lib/hooks/useAuth'
-// import { MapSelector } from '@/components/features/Map/MapSelector'
-
-// // 地图设置组件
-// function MapSettings() {
-//   const [showRoutes, setShowRoutes] = useState(true)
-//   const [showMarkers, setShowMarkers] = useState(true)
-//   const [show3D, setShow3D] = useState(false)
-//   const [satelliteView, setSatelliteView] = useState(false)
-
-//   return (
-//     <div className="mt-8">
-//       <h3 className="text-sm font-semibold text-gray-900 mb-3">地图设置</h3>
-//       <div className="space-y-2">
-//         <label className="flex items-center cursor-pointer">
-//           <input
-//             type="checkbox"
-//             className="mr-2"
-//             checked={showRoutes}
-//             onChange={(e) => setShowRoutes(e.target.checked)}
-//           />
-//           <span className="text-sm">显示路线</span>
-//         </label>
-//         <label className="flex items-center cursor-pointer">
-//           <input
-//             type="checkbox"
-//             className="mr-2"
-//             checked={showMarkers}
-//             onChange={(e) => setShowMarkers(e.target.checked)}
-//           />
-//           <span className="text-sm">显示标记</span>
-//         </label>
-//         <label className="flex items-center cursor-pointer">
-//           <input
-//             type="checkbox"
-//             className="mr-2"
-//             checked={show3D}
-//             onChange={(e) => setShow3D(e.target.checked)}
-//           />
-//           <span className="text-sm">3D建筑</span>
-//         </label>
-//         <label className="flex items-center cursor-pointer">
-//           <input
-//             type="checkbox"
-//             className="mr-2"
-//             checked={satelliteView}
-//             onChange={(e) => setSatelliteView(e.target.checked)}
-//           />
-//           <span className="text-sm">卫星视图</span>
-//         </label>
-//       </div>
-
-//       {/* 设置说明 */}
-//       <div className="mt-4 p-2 bg-blue-50 rounded text-xs text-blue-700">
-//         <p>• 路线和标记设置立即生效</p>
-//         <p>• 3D建筑需要3D地图支持</p>
-//         <p>• 卫星视图可切换地图样式</p>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default function MapPage() {
-//   // 路由保护，确保用户已登录
-//   const { isAuthenticated, isLoading: authLoading } = useRequireAuth()
-
-//   // 状态管理
-//   const [selectedItinerary] = useState<string | null>(null)
-//   const [mapCenter, setMapCenter] = useState<[number, number]>([39.9042, 116.4074]) // 默认北京 [lat, lng]
-//   const [mapZoom, setMapZoom] = useState(10)
-
-//   // 如果正在加载或未认证，显示加载状态
-//   if (authLoading || !isAuthenticated) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center">
-//         <div className="text-center">
-//           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-//           <p className="mt-4 text-gray-600">加载中...</p>
-//         </div>
-//       </div>
-//     )
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       {/* 页面标题栏 */}
-//       <div className="bg-white shadow-sm border-b">
-//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//           <div className="flex justify-between items-center py-4">
-//             <div>
-//               <h1 className="text-2xl font-bold text-gray-900">3D地图</h1>
-//               <p className="text-sm text-gray-600">在地图上查看您的旅行路线</p>
-//             </div>
-
-//             {/* 地图控制按钮 */}
-//             <div className="flex space-x-2">
-//               <button
-//                 onClick={() => setMapZoom(prev => Math.min(prev + 1, 18))}
-//                 className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-//               >
-//                 放大
-//               </button>
-//               <button
-//                 onClick={() => setMapZoom(prev => Math.max(prev - 1, 1))}
-//                 className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-//               >
-//                 缩小
-//               </button>
-//               <button
-//                 onClick={() => {
-//                   setMapCenter([39.9042, 116.4074])
-//                   setMapZoom(10)
-//                 }}
-//                 className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
-//               >
-//                 重置
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* 主要内容区域 */}
-//       <div className="flex h-[calc(100vh-80px)]">
-//         {/* 左侧边栏 */}
-//         <div className="w-80 bg-white shadow-sm border-r overflow-y-auto">
-//           <div className="p-4">
-//             <h2 className="text-lg font-semibold text-gray-900 mb-4">我的行程</h2>
-
-//             {/* 行程列表 */}
-//             <div className="space-y-3">
-//               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-//                 <h3 className="font-medium text-gray-900">北京三日游</h3>
-//                 <p className="text-sm text-gray-600">3天 · ¥2000</p>
-//                 <div className="mt-2 flex space-x-2">
-//                   <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">历史文化</span>
-//                   <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">美食</span>
-//                 </div>
-//               </div>
-
-//               <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer opacity-50">
-//                 <h3 className="font-medium text-gray-900">上海周末游</h3>
-//                 <p className="text-sm text-gray-600">2天 · ¥1500</p>
-//                 <div className="mt-2 flex space-x-2">
-//                   <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">现代都市</span>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* 地图图例 */}
-//             <div className="mt-8">
-//               <h3 className="text-sm font-semibold text-gray-900 mb-3">图例</h3>
-//               <div className="space-y-2 text-sm">
-//                 <div className="flex items-center">
-//                   <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-//                   <span>景点</span>
-//                 </div>
-//                 <div className="flex items-center">
-//                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-//                   <span>酒店</span>
-//                 </div>
-//                 <div className="flex items-center">
-//                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-//                   <span>餐厅</span>
-//                 </div>
-//                 <div className="flex items-center">
-//                   <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-//                   <span>交通</span>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* 地图设置 */}
-//             <MapSettings />
-//           </div>
-//         </div>
-
-//         {/* 右侧地图区域 */}
-//         <div className="flex-1 relative">
-//           <MapSelector
-//             center={mapCenter}
-//             zoom={mapZoom}
-//             onCenterChange={setMapCenter}
-//             onZoomChange={setMapZoom}
-//             selectedItinerary={selectedItinerary}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -311,10 +113,8 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
           console.log("API返回的行程数据:", result);
 
           if (result.success && result.data) {
-            console.log("🔍 原始API数据:", result.data);
             // 转换数据格式以适配地图组件
             const formattedItineraries = result.data.map((item: any) => {
-              console.log("🔍 处理行程项:", item);
               const activities: ItineraryActivity[] = [];
 
               // 添加测试数据以确保路线能显示
@@ -380,7 +180,6 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
                     description: "测试活动",
                   });
                 });
-                console.log("🧪 添加了测试活动数据:", activities);
               }
 
               return {
@@ -393,19 +192,8 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
                 activities: activities,
                 createdAt: item.createdAt,
                 interests: (() => {
-                  console.log("🔍 兴趣偏好数据检查:", {
-                    itemInterests: item.interests,
-                    dataInterests: item.data?.interests,
-                    fullData: item.data,
-                  });
-
-                  // 优先从 data.interests 获取（这是规划页面保存的位置）
                   if (item.data && item.data.interests) {
                     if (Array.isArray(item.data.interests)) {
-                      console.log(
-                        "✅ 从 data.interests 获取数组:",
-                        item.data.interests
-                      );
                       return item.data.interests;
                     } else if (
                       typeof item.data.interests === "string" &&
@@ -414,18 +202,13 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
                       const parsed = item.data.interests
                         .split(",")
                         .map((s) => s.trim())
-                        .filter((s) => s);
-                      console.log("✅ 从 data.interests 解析字符串:", parsed);
+                        .filter((s) => s);                    
                       return parsed;
                     }
                   }
 
                   // 备选：从顶级 interests 字段获取
                   if (Array.isArray(item.interests)) {
-                    console.log(
-                      "✅ 从 item.interests 获取数组:",
-                      item.interests
-                    );
                     return item.interests;
                   } else if (
                     typeof item.interests === "string" &&
@@ -435,11 +218,9 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
                       .split(",")
                       .map((s) => s.trim())
                       .filter((s) => s);
-                    console.log("✅ 从 item.interests 解析字符串:", parsed);
                     return parsed;
                   }
 
-                  console.log("❌ 未找到兴趣偏好数据，返回空数组");
                   return [];
                 })(),
                 travelStyle: (() => {
@@ -448,13 +229,10 @@ function useItineraryData(user: { email?: string; id?: string } | null) {
                     item.travel_style ||
                     (item.data && item.data.travelStyle) ||
                     "休闲旅行";
-                  console.log("🎯 旅行风格:", style);
                   return style;
                 })(),
               };
             });
-
-            console.log("📊 格式化后的行程数据:", formattedItineraries);
             setItineraries(formattedItineraries);
           } else {
             console.error("API返回错误:", result.error);
@@ -853,11 +631,6 @@ function AmapComponent({
 
   // 更新标记和路线
   useEffect(() => {
-    console.log("🔄 地图更新触发:", {
-      map: !!map,
-      selectedItinerary,
-      showRoutes,
-    });
 
     if (!map || !selectedItinerary) {
       // 清除所有标记
@@ -867,7 +640,6 @@ function AmapComponent({
     }
 
     const itinerary = itineraryData.find((i) => i.id === selectedItinerary);
-    console.log("📋 找到的行程:", itinerary);
     if (!itinerary) return;
 
     // 清除旧标记
@@ -879,9 +651,6 @@ function AmapComponent({
 
     itinerary.activities.forEach((activity, index) => {
       const [lng, lat] = activity.coordinates;
-      console.log(
-        `📍 活动 ${index + 1}: ${activity.name}, 坐标: [${lng}, ${lat}]`
-      );
       routePoints.push([lng, lat]);
 
       // 创建自定义标记 - 使用项目配色
@@ -965,15 +734,7 @@ function AmapComponent({
 
     setMarkers(newMarkers);
 
-    // 绘制路线
-    console.log("🛣️ 路线绘制状态:", {
-      showRoutes,
-      routePointsCount: routePoints.length,
-      routePoints,
-    });
     if (showRoutes && routePoints.length > 1) {
-      console.log("✅ 开始绘制路线，路径点:", routePoints);
-
       // 创建更明显的路线样式
       const polyline = new window.AMap.Polyline({
         path: routePoints,
@@ -1003,13 +764,7 @@ function AmapComponent({
       map.add(animatedPolyline);
       newMarkers.push(polyline);
       newMarkers.push(animatedPolyline);
-      console.log("✅ 路线已添加到地图");
-    } else {
-      console.log("❌ 路线未绘制:", {
-        showRoutes,
-        routePointsLength: routePoints.length,
-      });
-    }
+    } 
 
     // 调整视野以包含所有点，如果只有一个点则设置合适的缩放级别
     if (routePoints.length > 1) {
@@ -1035,39 +790,6 @@ function AmapComponent({
           "inset 0 2px 4px rgba(79, 70, 229, 0.1), inset 0 0 0 1px rgba(79, 70, 229, 0.05)",
       }}
     >
-      {/* 喀纳斯位置的动画LOGO */}
-      <motion.div
-        className="absolute z-20 pointer-events-none"
-        style={{
-          // 喀纳斯大概在新疆北部，在地图上大概是左上偏中的位置
-          top: "25%",
-          left: "15%",
-          transform: "translate(-50%, -50%)",
-        }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
-        <AnimatedLogo
-          size={80}
-          text="🏔️"
-          colors={{
-            primary: "from-emerald-500 via-teal-600 to-cyan-600",
-            secondary: "border-emerald-400/40",
-            accent: "bg-amber-400",
-          }}
-        />
-
-        {/* LOGO下方的标签 */}
-        <motion.div
-          className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 shadow-lg border border-white/50"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 3, duration: 0.8 }}
-        >
-          🏔️ 喀纳斯
-        </motion.div>
-      </motion.div>
     </div>
   );
 }
@@ -1175,13 +897,7 @@ function SmartControlPanel({
                 <div className="flex flex-wrap gap-1">
                   {/* 显示兴趣偏好 */}
                   {(() => {
-                    console.log("🏷️ 渲染行程标签:", {
-                      id: itinerary.id,
-                      title: itinerary.title,
-                      interests: itinerary.interests,
-                      travelStyle: itinerary.travelStyle,
-                    });
-
+                  
                     if (itinerary.interests && itinerary.interests.length > 0) {
                       return (
                         <>
@@ -1248,7 +964,6 @@ function SmartControlPanel({
                     type="checkbox"
                     checked={showRoutes}
                     onChange={(e) => {
-                      console.log("🔄 路线开关状态变更:", e.target.checked);
                       onShowRoutesChange(e.target.checked);
                     }}
                     className="sr-only"
@@ -1532,16 +1247,6 @@ export default function MapPage() {
         show3D={show3D}
         onShow3DChange={setShow3D}
       />
-
-      {/* 浮动信息面板 - 显示详细活动信息 - 在右边 */}
-      {/* <div className="block">
-        <AnimatePresence>
-          <FloatingInfoPanel
-            selectedItinerary={selectedItinerary}
-            itineraries={itineraries}
-          />
-        </AnimatePresence>
-      </div> */}
 
       {/* 主地图区域 - 右侧 */}
       <div className="absolute top-3 lg:top-6 bottom-3 lg:bottom-6 left-80 lg:left-96 right-3 lg:right-6">

@@ -1,6 +1,3 @@
-// 这是用户登录页面
-// 作为应届生，我会创建一个简单但功能完整的登录表单
-
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
@@ -11,30 +8,29 @@ import { useSearchParams } from "next/navigation";
 
 // 登录表单组件
 function SignInForm() {
-  // 状态管理
-  const [email, setEmail] = useState(""); // 邮箱输入
-  const [password, setPassword] = useState(""); // 密码输入
-  const [error, setError] = useState(""); // 错误信息
-  const [isSubmitting, setIsSubmitting] = useState(false); // 提交状态
-  const [hasShownMessage, setHasShownMessage] = useState(false); // 控制消息显示
+  const [email, setEmail] = useState(""); 
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [hasShownMessage, setHasShownMessage] = useState(false); 
 
   // 使用认证Hook
   const { login, loginWithGoogle, isLoading } = useAuth();
-  const { showSuccessToast, showErrorToast, showWarningToast } = useToast(); // Toast提示
-  const searchParams = useSearchParams(); // 获取URL参数
+  const { showSuccessToast, showErrorToast, showWarningToast } = useToast(); 
+  const searchParams = useSearchParams(); 
 
   // 检查是否有注册成功的消息
   useEffect(() => {
     const message = searchParams.get("message");
     if (message && !hasShownMessage) {
       showSuccessToast(`${message}`);
-      setHasShownMessage(true); // 标记已显示过消息
+      setHasShownMessage(true);
     }
   }, [searchParams, showSuccessToast, hasShownMessage]);
 
   // 处理表单提交
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // 阻止默认提交行为
+    e.preventDefault();
 
     // 清除之前的错误信息
     setError("");
@@ -54,7 +50,7 @@ function SignInForm() {
       return;
     }
 
-    setIsSubmitting(true); // 设置提交状态
+    setIsSubmitting(true); 
 
     try {
       // 调用登录函数

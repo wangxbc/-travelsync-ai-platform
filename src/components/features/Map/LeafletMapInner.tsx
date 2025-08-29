@@ -1,6 +1,3 @@
-// Leaflet地图内部实现
-// 避免SSR问题
-
 'use client'
 
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
@@ -32,8 +29,6 @@ export default function LeafletMapInner({
   onZoomChange,
   selectedItinerary
 }: LeafletMapInnerProps) {
-  // 当选中的行程改变时，可以在这里添加相应的逻辑
-  // 目前暂时使用 console.log 来避免未使用变量警告
   if (selectedItinerary) {
     // 未来可以根据选中的行程显示不同的标记和路线
   }

@@ -16,14 +16,6 @@ export async function PUT(request: NextRequest) {
 
     const { name, bio, location, website, phone, gender, occupation, interests, socialLinks, preferences, birthday } = await request.json()
 
-    console.log('💾 开始更新用户资料:', {
-      userId: session.user.id || session.user.email,
-      name,
-      bio,
-      location,
-      website
-    })
-
     // 准备更新数据
     const updateData: any = {
       name,
@@ -50,7 +42,6 @@ export async function PUT(request: NextRequest) {
     )
 
     if (updatedUser) {
-      console.log('✅ 用户资料更新成功:', updatedUser.name)
       return NextResponse.json({
         success: true,
         data: {
@@ -72,7 +63,7 @@ export async function PUT(request: NextRequest) {
         }
       })
     } else {
-      console.error('❌ 用户资料更新失败')
+      console.error('用户资料更新失败')
       return NextResponse.json(
         { success: false, error: '用户资料更新失败' },
         { status: 500 }
