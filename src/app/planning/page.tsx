@@ -775,7 +775,6 @@ export default function PlanningPage() {
                           <div className="mb-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 flex-shrink-0">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <span className="text-lg">🎯</span>
                                 <div>
                                   <div className="text-sm font-semibold text-purple-700">
                                     兴趣匹配度 {matchRate}%

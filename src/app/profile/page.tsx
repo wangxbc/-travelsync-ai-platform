@@ -1131,7 +1131,6 @@ export default function ProfilePage() {
                   ) : itineraries.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 empty-state">
-                        <span className="text-3xl text-gray-400">📋</span>
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">
                         暂无旅行计划
