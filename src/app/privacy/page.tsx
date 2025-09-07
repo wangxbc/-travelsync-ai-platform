@@ -7,7 +7,7 @@ export default function PrivacyPage() {
 
           <div className="prose max-w-none text-gray-600">
             <p className="text-sm text-gray-500 mb-6">
-              最后更新时间：2024年1月1日
+              最后更新时间：2025年8月15日
             </p>
 
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -89,9 +89,9 @@ export default function PrivacyPage() {
             </h2>
             <p className="mb-4">如果您对此隐私政策有任何问题，请联系我们：</p>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p>邮箱: privacy@travelsync.com</p>
-              <p>地址: 河南省 郑州市 金水区 金水区xxx路xxx号</p>
-              <p>电话: 400-xxx-xxxx</p>
+              <p>邮箱: 2499109204@qq.com</p>
+              <p>地址: 河南省 郑州市 二七区</p>
+              <p>电话: 19836555658</p>
             </div>
           </div>
         </div>
