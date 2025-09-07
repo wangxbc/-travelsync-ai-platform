@@ -71,9 +71,8 @@ export default function AboutPage() {
               如果您有任何问题或建议，欢迎通过以下方式联系我们：
             </p>
             <div className="mt-4 space-y-2 text-gray-600">
-              <p>邮箱: support@travelsync.com</p>
-              <p>网站: https://travelsync.com</p>
-              <p>微信: TravelSync官方</p>
+              <p>邮箱: 2499109204@qq.com</p>
+              <p>微信: 19836555658</p>
             </div>
           </div>
         </div>
